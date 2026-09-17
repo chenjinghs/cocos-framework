@@ -1,0 +1,21 @@
+{
+    "name": "patch-builder",
+    "version": "1.0.0",
+    "description": "",
+    "main": "src/index.ts",
+    "scripts": {
+        "build-patch": " tsx src/index.ts --build ./test --manifest-file ./test/manifest.json --oldest-version 65361 --current-version 65613 --patch-root-url ./test --resource-path ../../../TempSaved/streaming-dist --recent-patch-count 5 --patch-script patcher.js --base-version-interval 10 --ignore-files patcher-settings.json --ignore-files-with-hash ./ignore-files-with-hash.json"
+    },
+    "author": "cheng.liang",
+    "license": "ISC",
+    "devDependencies": {
+        "@types/fs-extra": "^11.0.2",
+        "@types/node": "^20.6.3",
+        "archiver": "^6.0.1",
+        "commander": "^11.0.0",
+        "fs-extra": "^11.1.1",
+        "glob": "^10.3.10",
+        "json-stable-stringify": "^1.0.2",
+        "tsx": "^3.12.10"
+    }
+}

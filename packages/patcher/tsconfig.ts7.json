@@ -1,0 +1,11 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "tsBuildInfoFile": "./tsconfig.ts7.tsbuildinfo"
+    },
+    "references": [
+        {
+            "path": "../patch-common/tsconfig.ts7.json"
+        }
+    ]
+}

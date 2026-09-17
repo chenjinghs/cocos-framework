@@ -1,0 +1,7 @@
+{
+    "name": "patch-common",
+    "version": "1.0.0",
+    "description": "Shared patch info types and pure helpers for client and patcher.",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts"
+}

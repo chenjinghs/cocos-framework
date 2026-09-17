@@ -1,0 +1,29 @@
+{
+    "private": "true",
+    "workspaces": [
+        "packages/*",
+        "scripts/*"
+    ],
+    "scripts": {
+        "export-proto": "yarn --cwd ./scripts/export-proto-to-kts start",
+        "export-proto-increment": "yarn export-proto --increment",
+        "clean": "yarn rimraf -g ./{packages,scripts}/*/{dist,*.tsbuildinfo}",
+        "lint": "yarn oxlint",
+        "lint:fix": "yarn oxlint --fix",
+        "format": "yarn oxfmt --disable-nested-config",
+        "format:check": "yarn oxfmt --disable-nested-config --check",
+        "sentry-log": "yarn --cwd ./scripts/sentry-log-decrypt-cli start",
+        "sentry-error-tracer": "yarn --cwd ./scripts/sentry-error-tracer start",
+        "localization-tool": "yarn --cwd ./scripts/localization-tool start"
+    },
+    "devDependencies": {
+        "@types/node": "^25.6.2",
+        "glob": "^10.3.16",
+        "oxlint": "^1.73.0",
+        "oxfmt": "^0.58.0",
+        "rimraf": "5.0.9",
+        "tsx": "^4.22.4",
+        "@typescript/native": "npm:typescript@^7.0.2",
+        "typescript": "npm:@typescript/typescript6@^6.0.2"
+    }
+}

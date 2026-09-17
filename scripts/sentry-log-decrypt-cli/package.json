@@ -1,0 +1,20 @@
+{
+    "name": "sentry-log-decrypt-cli",
+    "version": "1.0.0",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "start": "yarn && yarn tsx ./src/index.ts",
+        "build": "yarn && yarn tsc -p tsconfig.json",
+        "typecheck": "yarn && yarn tsc --noEmit -p tsconfig.json"
+    },
+    "author": "",
+    "license": "ISC",
+    "description": "Decrypt Sentry log .enc files without Unity.",
+    "dependencies": {
+        "tsx": "^4.19.3"
+    },
+    "devDependencies": {
+        "@types/node": "^22.15.30"
+    }
+}

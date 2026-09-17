@@ -1,0 +1,35 @@
+{
+    "folders": [
+        {
+            "name": "framework",
+            "path": "."
+        }
+    ],
+    "settings": {
+        "oxc.requireConfig": true,
+        "oxc.lint.run": "onSave",
+        "[typescript]": {
+            "editor.defaultFormatter": "oxc.oxc-vscode",
+            "editor.formatOnPaste": false,
+            "editor.formatOnType": false,
+            "editor.formatOnSave": true,
+            "editor.formatOnSaveMode": "file",
+            "editor.codeActionsOnSave": {
+                "source.fixAll.oxc": "always"
+            },
+            "files.encoding": "utf8",
+            "files.eol": "\n",
+            "files.trimFinalNewlines": true,
+            "files.trimTrailingWhitespace": true
+        },
+        "npm.scriptExplorerExclude": [
+            "^(?!(export-proto|export-proto-increment)$).*"
+        ],
+        "terminal.integrated.defaultProfile.windows": "Git Bash",
+        "importSorter.generalConfiguration.sortOnBeforeSave": true,
+        "importSorter.importStringConfiguration.maximumNumberOfImportExpressionsPerLine.type": "words",
+        "importSorter.importStringConfiguration.quoteMark": "double",
+        "importSorter.sortConfiguration.removeUnusedDefaultImports": true,
+        "importSorter.sortConfiguration.removeUnusedImports": true,
+    }
+}

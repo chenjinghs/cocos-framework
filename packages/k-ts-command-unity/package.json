@@ -1,0 +1,16 @@
+{
+    "name": "k-ts-command-unity",
+    "version": "0.2.1",
+    "description": "TS 层接入 CommandLine 逻辑",
+    "repository": {},
+    "dependencies": {
+        "k-ts-framework": "*"
+    },
+    "author": "",
+    "license": "ISC",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "files": [
+        "dist"
+    ]
+}

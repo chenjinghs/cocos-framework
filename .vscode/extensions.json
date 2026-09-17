@@ -1,0 +1,7 @@
+{
+    "recommendations": [
+      "oxc.oxc-vscode",
+      "mike-co.import-sorter",
+      "TypeScriptTeam.native-preview"
+    ]
+}

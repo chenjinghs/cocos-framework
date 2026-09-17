@@ -1,0 +1,15 @@
+{
+  "name": "k-ts-framework",
+  "version": "0.3.7",
+  "description": "kts core framework, engineless.",
+  "repository": {
+    "type": "git",
+    "url": "https://git.shiyou.kingsoft.com/neon/kgamekit/unreal/ktsframework.git"
+  },
+  "author": "kingsoft",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "dependencies": {
+    "reflect-metadata": "0.1.13"
+  }
+}

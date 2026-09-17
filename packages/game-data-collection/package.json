@@ -1,0 +1,15 @@
+{
+    "name": "game-data-collection",
+    "version": "0.2.2",
+    "description": "",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "author": "",
+    "files": [
+        "dist"
+    ],
+    "license": "ISC",
+    "dependencies": {
+        "json-util": "git+https://git.shiyou.kingsoft.com/client/typescript/json-util.git#v0.0.7"
+    }
+}

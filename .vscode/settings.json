@@ -1,0 +1,34 @@
+{
+    "[typescript]": {
+        "editor.defaultFormatter": "oxc.oxc-vscode",
+        "editor.formatOnPaste": false, // required
+        "editor.formatOnType": false, // required
+        "editor.formatOnSave": true, // optional
+        "editor.formatOnSaveMode": "file", // required to format on save
+        "files.encoding": "utf8",
+        "files.eol": "\n",
+        "files.trimFinalNewlines": true,
+        "files.trimTrailingWhitespace": true
+    },
+    "cSpell.words": [
+        "CLRS",
+        "Dotween",
+        "DT*",
+        "gacha",
+        "Horo",
+        "IDT*",
+        "interactable",
+        "Nonstrict",
+        "overrided",
+        "unstash",
+        "wechat"
+    ],
+    "oxc.lint.run": "onSave",
+    "terminal.integrated.defaultProfile.windows": "Git Bash",
+    "importSorter.generalConfiguration.sortOnBeforeSave": true,
+    "importSorter.importStringConfiguration.maximumNumberOfImportExpressionsPerLine.type": "words",
+    "importSorter.importStringConfiguration.quoteMark": "double",
+    "importSorter.sortConfiguration.removeUnusedDefaultImports": true,
+    "importSorter.sortConfiguration.removeUnusedImports": true
+    
+}

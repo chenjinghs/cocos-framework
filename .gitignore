@@ -1,0 +1,8 @@
+node_modules
+dist
+*.tsbuildinfo
+yarn.lock
+package-lock.json
+.svn
+minigame-dist
+.webpack-cache

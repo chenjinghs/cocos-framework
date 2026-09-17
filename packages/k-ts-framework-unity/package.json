@@ -1,0 +1,11 @@
+{
+    "name": "k-ts-framework-unity",
+    "version": "0.0.1",
+    "description": "k-ts-framework 在 unity 中的扩展",
+    "author": "kingsoft",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "dependencies": {
+        "k-ts-framework": "*"
+    }
+}

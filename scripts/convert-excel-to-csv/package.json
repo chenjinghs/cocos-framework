@@ -1,0 +1,28 @@
+{
+    "name": "convert-excel-to-csv",
+    "version": "1.0.0",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "start": "yarn && yarn tsx ./src/index.ts"
+    },
+    "author": "",
+    "license": "ISC",
+    "description": "",
+    "dependencies": {
+        "chokidar": "^4.0.1",
+        "commander": "^11.1.0",
+        "exceljs": "git+https://git.shiyou.kingsoft.com/client/typescript/exceljs.git#fix-comments-issue",
+        "fs-extra": "^11.2.0",
+        "glob": "^10.3.10",
+        "p-limit": "^3.1.0",
+        "papaparse": "^5.4.1",
+        "rfdc": "^1.4.1",
+        "rimraf": "^5.0.5",
+        "tsx": "^4.19.0"
+    },
+    "devDependencies": {
+        "@types/fs-extra": "^11.0.3",
+        "@types/node": "^20.8.7"
+    }
+}

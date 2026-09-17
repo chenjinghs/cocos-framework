@@ -1,0 +1,16 @@
+{
+    "name": "k-ts-protobuf",
+    "version": "0.0.1",
+    "description": "protobuf for kts framework",
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "k-ts-framework": "*",
+        "protobufjs": "^7.0.0"
+    },
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "files": [
+        "dist"
+    ]
+}

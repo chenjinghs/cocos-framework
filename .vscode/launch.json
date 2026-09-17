@@ -1,0 +1,13 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Attach to TypeScript",
+            "type": "node",
+            "request": "attach",
+            "port": 8802,
+            "timeout": 200000,
+            "autoAttachChildProcesses": true,
+        }
+    ]
+}

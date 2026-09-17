@@ -1,0 +1,28 @@
+{
+    "name": "patcher",
+    "version": "1.0.0",
+    "description": "",
+    "main": "src/index.ts",
+    "author": "cheng.liang",
+    "license": "ISC",
+    "scripts": {
+        "test": "tsx --test tests/*.test.ts",
+        "build-dev": "yarn typecheck && yarn webpack --config webpack.config.js",
+        "build-prod": "yarn typecheck && yarn webpack --config webpack.config.js --mode=production",
+        "typecheck": "yarn tsc --noEmit -p tsconfig.ts7.json"
+    },
+    "dependencies": {
+        "js-sha256": "^0.11.0",
+        "patch-common": "*"
+    },
+    "devDependencies": {
+        "javascript-obfuscator": "4.2.0",
+        "oxc-transform": "^0.138.0",
+        "oxc-webpack-loader": "^1.0.2",
+        "typescript": "^7.0.2",
+        "webpack": "^5.98.0",
+        "webpack-cli": "^6.0.1",
+        "webpack-node-externals": "^3.0.0",
+        "webpack-obfuscator": "3.6.1"
+    }
+}
