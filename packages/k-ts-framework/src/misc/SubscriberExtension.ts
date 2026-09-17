@@ -520,12 +520,13 @@ export interface IEnvTimer {
     clearTimeout: (handle?: number) => void;
 }
 
-// 默认实现都用系统的
-export const DEFAULT_ENV_TIMER = {
-    setInterval: setInterval,
-    setTimeout: setTimeout,
-    clearInterval: clearInterval,
-    clearTimeout: clearTimeout,
+// 默认实现都用系统的；node 类型下定时器返回 Timeout、浏览器返回 number，这里统一以 number 名义透传
+// （仅类型收窄，运行值原样交给 clearInterval/clearTimeout，跨运行时安全）
+export const DEFAULT_ENV_TIMER: IEnvTimer = {
+    setInterval: (callback, timeout, ...args) => setInterval(callback, timeout, ...args) as unknown as number,
+    setTimeout: (handler, timeout, ...args) => setTimeout(handler, timeout, ...args) as unknown as number,
+    clearInterval: (handle) => clearInterval(handle as unknown as Parameters<typeof clearInterval>[0]),
+    clearTimeout: (handle) => clearTimeout(handle as unknown as Parameters<typeof clearTimeout>[0]),
 };
 
 export const TIMER_INTERVAL = Symbol("TimerInterval");

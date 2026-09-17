@@ -1,0 +1,17 @@
+{
+    "name": "patcher-cocos",
+    "version": "0.1.0",
+    "description": "patcher Cocos Creator 4.0 engine implementation",
+    "author": "kingsoft",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "scripts": {
+        "test": "tsx --tsconfig ./tsconfig.test.json --test tests/*.test.ts",
+        "typecheck": "tsc --noEmit -p tsconfig.json"
+    },
+    "dependencies": {
+        "k-ts-framework-cocos": "*",
+        "patch-common": "*",
+        "patcher": "*"
+    }
+}

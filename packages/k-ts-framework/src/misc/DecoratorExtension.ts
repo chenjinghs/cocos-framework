@@ -19,11 +19,7 @@ declare module "../framework/Decorator" {
             target: Object,
             propertyKey: string | symbol,
             descriptor: TypedPropertyDescriptor<T>,
-        ) => TypedPropertyDescriptor<
-            (
-                param: FunctionParamType<T>,
-            ) => VerifyActionOrEvent<FunctionParamType<T>, InferActionReturnType<FunctionParamType<T>>>
-        >;
+        ) => TypedPropertyDescriptor<(param: FunctionParamType<T>) => VerifyActionOrEvent<FunctionParamType<T>, InferActionReturnType<FunctionParamType<T>>>>;
 
         /**
          * 订阅 StoreAction或者StoreEvent, 标记的函数参数必须为1个且为StoreAction或者StoreEvent类型,
@@ -37,11 +33,7 @@ declare module "../framework/Decorator" {
             target: Object,
             propertyKey: string | symbol,
             descriptor: TypedPropertyDescriptor<T>,
-        ) => TypedPropertyDescriptor<
-            (
-                param: FunctionParamType<T>,
-            ) => VerifyStoreActionOrStoreEvent<FunctionParamType<T>, InferStoreActionReturnType<FunctionParamType<T>>>
-        >;
+        ) => TypedPropertyDescriptor<(param: FunctionParamType<T>) => VerifyStoreActionOrStoreEvent<FunctionParamType<T>, InferStoreActionReturnType<FunctionParamType<T>>>>;
     }
 }
 
@@ -50,7 +42,10 @@ declare module "../framework/Decorator" {
 function actionEventOn(target: any, _propertyKey: string | symbol, descriptor: PropertyDescriptor, ...args: any[]) {
     if (args.length > 1) return false;
 
-    let paramTypes = Reflect.getMetadata("design:paramtypes", target, _propertyKey) as Array<any>;
+    // esbuild/tsx 等转换器不发射 emitDecoratorMetadata，此时无法判定事件类型；
+    // 吞掉装饰器保证模块可加载（真实构建由 tsc/webpack 发射 metadata，订阅行为不变）
+    let paramTypes = Reflect.getMetadata("design:paramtypes", target, _propertyKey) as Array<any> | undefined;
+    if (paramTypes === undefined) return true;
     if (paramTypes.length !== 1) return false;
 
     let storeCtor = args[0];

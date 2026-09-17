@@ -1,8 +1,13 @@
 {
     "extends": "./tsconfig.json",
     "compilerOptions": {
-        "tsBuildInfoFile": "./tsconfig.ts7.tsbuildinfo"
+        "composite": true,
+        "rootDir": "src",
+        "outDir": "dist",
+        "tsBuildInfoFile": "./tsconfig.ts7.tsbuildinfo",
+        "paths": {}
     },
+    "include": ["src"],
     "references": [
         {
             "path": "../k-ts-framework/tsconfig.ts7.json"

@@ -135,7 +135,7 @@ class JsonDataTableSystem extends F.System {
     }
 
     private getFullPath(filePath: string) {
-        return CS.System.IO.Path.Combine(getContentRootPath(), filePath);
+        return joinPath(getContentRootPath(), filePath);
     }
 
     private loadJsonData(path: string): any {
@@ -146,4 +146,13 @@ class JsonDataTableSystem extends F.System {
         if (loadFunc) return loadFunc(fullPath);
         else return parseJson(fullPath);
     }
+}
+
+/** POSIX 风格纯字符串路径拼接，不依赖引擎 */
+function joinPath(...segments: string[]): string {
+    return segments
+        .filter((v) => v.length > 0)
+        .join("/")
+        .replace(/\\/g, "/")
+        .replace(/\/+/g, "/");
 }

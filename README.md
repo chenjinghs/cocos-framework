@@ -1,33 +1,33 @@
 # K-TS Framework
 
-基于 **Unity + Puerts** 的 TypeScript 游戏开发框架。以 yarn workspaces monorepo 形式组织,包含游戏客户端运行时框架、数据导出管线、热更新补丁体系与配套工具链。
+基于 **Cocos Creator 4.0**(TS 原生引擎,无 C# 侧)的 TypeScript 游戏开发框架。以 yarn workspaces monorepo 形式组织,包含游戏客户端运行时框架、数据导出管线、热更新补丁体系与配套工具链。
 
-本仓库是**通用框架**,不包含任何具体游戏业务逻辑。游戏项目以本框架为依赖,在自己的仓库中编写业务代码与数据表。
+本仓库是**通用框架**,不包含任何具体游戏业务逻辑。游戏项目以本框架为依赖,在自己的仓库/Cocos 工程中编写业务代码与数据表。
 
 ## 运行环境
 
-| 环境 | 说明 |
-|---|---|
-| Node.js | >= 20(开发/工具链) |
-| Yarn | v1(classic,workspaces) |
-| Unity + Puerts | 运行时宿主(PuerTS 执行 TypeScript) |
-| 目标平台 | Unity 编辑器 / iOS / Android / Windows / 微信小游戏 |
+| 环境          | 说明                                                                  |
+| ------------- | --------------------------------------------------------------------- |
+| Node.js       | >= 20(开发/工具链)                                                    |
+| Yarn          | v1(classic,workspaces)                                                |
+| Cocos Creator | 4.0 运行时宿主(消费项目提供,本仓库仅做类型自检)                       |
+| 目标平台      | Cocos 原生(iOS/Android/Windows/ macOS)/ 编辑器预览 / Web / 微信小游戏 |
 
 ## 目录结构
 
 ```
 packages/                    框架核心包
-├── k-ts-framework/          运行时核心:系统/管理器/存储/事件/装饰器/订阅钩子
-├── k-ts-framework-unity/    Unity 绑定:GameObject/Prefab/UnityEvent 封装
-├── k-ui-framework/          UI 框架:UISystem/绑定器/状态管理
-├── k-ui-framework-unity/    Unity UI 实现:UnityUISystem/控件搜索
+├── k-ts-framework/          运行时核心:系统/管理器/存储/事件/装饰器/订阅钩子(引擎无关)
+├── k-ts-framework-cocos/    Cocos 绑定:cc 收口/资源加载/PrefabProxy/事件包装/ByteArray/异步加载
+├── k-ui-framework/          UI 框架:UISystem/绑定器/状态管理(引擎无关)
+├── k-ui-framework-cocos/    Cocos UI 实现:8 个 UIEngineInterface linker/控件搜索/PrefabProxyEx
 ├── k-ts-protobuf/           网络协议:protobuf 装饰器注册与收发系统
-├── k-ts-command-unity/      命令系统:C2D 命令路由与分发
 ├── game-data-collection/    数据运行时:JSON / INI 数据表加载与查询
 ├── k-export-flow/           数据导出管线引擎:Excel→CSV→Schema→TS/Lua/JSON,支持增量与 worker 并行
-├── patcher/                 热更新下载/补丁应用(含更新 UI)
+├── patcher/                 热更新补丁核心:manifest/下载整理/应用流程(引擎无关)
+├── patcher-cocos/           Cocos 补丁实现:jsb IFS/纯 JS IPath/IEngine 全量实现/最小更新 UI
 ├── patch-common/            补丁体系共享类型(manifest/版本/语言通道)
-└── libs-generator/          node 内置模块(fs/path/url/source-map)的小游戏兼容打包
+└── (旧 Unity 绑定包已从 git 历史移除,可从 b31cb16 找回)
 scripts/                     工具链(每个子目录是独立 workspace)
 ├── export-proto-to-kts/     .proto → TS/Lua 协议代码导出(必传路径参数)
 ├── convert-excel-to-csv/    Excel → CSV 转换(支持增量)
@@ -52,43 +52,69 @@ yarn format
 yarn clean
 
 # 运行各包测试(node 内置 test runner,经 tsx)
-yarn --cwd packages/k-export-flow test      # 82 个测试
-yarn --cwd packages/patcher test
+yarn --cwd packages/k-export-flow test           # 82 个测试
+yarn --cwd packages/k-ts-framework-cocos test    # ByteArray/PrefabProxy/readTextFile
+yarn --cwd packages/k-ui-framework-cocos test    # sortingOrder → siblingIndex 重排
+yarn --cwd packages/patcher-cocos test           # IPath 纯 JS 实现
+yarn --cwd packages/patcher test                 # 补丁整理 IO 语义(需消费项目注入 LanguageDefine)
 ```
 
 ## 框架包依赖方向
 
 ```
 k-ts-framework(核心)
-  ├─ k-ts-framework-unity ── k-ts-command-unity
-  ├─ k-ui-framework ──────── k-ui-framework-unity
+  ├─ k-ts-framework-cocos ── k-ui-framework-cocos / patcher-cocos
+  ├─ k-ui-framework
   ├─ k-ts-protobuf
   ├─ game-data-collection
   └─ patcher ── patch-common
 
-k-export-flow / libs-generator:独立,不依赖运行时核心
+k-export-flow:独立,不依赖运行时核心
 ```
 
 消费项目(具体游戏)位于框架之上,通过 workspace 或包引用依赖各 `k-*` 包。
+
+## Cocos 接入
+
+消费项目的 Cocos Creator 4.0 工程:
+
+1. **场景挂两个组件**:在场景任一节点挂 `KFrameworkBootstrap`(k-ts-framework-cocos)与 `CocosUISystem`(k-ui-framework-cocos),onLoad 时自动完成 `registerKFrameworkCocos()` / `registerCocosUI()` 装配(订阅器、linker、UI 系统创建)。
+2. **面板放置**:UI 面板 prefab 放 `resources/ui/<uiTag>.prefab`(常量 `UI_PANEL_PREFIX` 单点可改);wnd 模板经 `registerCocosUITemplate(tag, { wnd: { wndLayer } })` 注册,未注册默认 wndLayer 1。
+3. **热更新启动**:
+
+```ts
+import { startPatcher } from "patcher";
+import { registerPatcherCocos } from "patcher-cocos";
+
+let engine = registerPatcherCocos({
+    entryUrl: "https://patch.example.com",
+    localResVersion: 74883,
+    onUnzipFile: async (zip, savePath) => myUnzip(zip, savePath), // 解压外抛给消费项目
+});
+await startPatcher(engine, builtinLanguages, defaultLanguage);
+```
+
+`IFS` 在非 jsb 运行时(编辑器预览/web)统一外抛,消费项目用 `registerPatcherCocos({ ... })` 按回调覆盖。
+数据表 JSON 经 `F.Engine.readTextFile` 同步读取:原生走 `jsb.fileUtils`,编辑器/ web 走 resources 已缓存的 TextAsset,可覆盖。
 
 ## 使用本框架的游戏项目需要提供
 
 以下内容由消费项目生成或注入,本仓库刻意不包含:
 
-1. **`typing/` 环境声明** — `tsconfig.base.json` 的 `typeRoots` 指向 `./typing`,包含 `puerts` / `csharp` / `global` / `prefab` 等 ambient 类型(PuerTS 生成)。
-2. **`packages/patcher/src/LanguageDefine.ts` 与 `packages/patch-common/src/LanguageDefine.ts`** — 多语言枚举(`EGameLanguage` 等),由消费项目的 export-flow 管线生成(参考 `scripts/patcher-builder/src/LanguageChannelConfig.ts` 中的读取与校验注释:该文件顶层引用 Unity 运行时全局 `CS`,无法在 Node 下 import,只能解析源文件);`patcher` 与 `patch-common` 编译前必须存在,语言列表变更后需重新生成。
+1. **`cc` 引擎类型** — Cocos 4.0 工程自带真实 cc 类型。框架自带的 `typing/cocos/cc.d.ts` 仅供仓库内 tsconfig 类型自检(最小 API 子集),消费项目**不要** include;若出现重复声明,把该文件从 `typeRoots` 链路移出、改由自检 tsconfig 显式引入。
+2. **`packages/patcher/src/LanguageDefine.ts` 与 `packages/patch-common/src/LanguageDefine.ts`** — 多语言枚举(`EGameLanguage` 等),由消费项目的 export-flow 管线生成(参考 `scripts/patcher-builder/src/LanguageChannelConfig.ts` 中的读取与校验);`patcher` 与 `patch-common` 编译前必须存在,语言列表变更后需重新生成。
 3. **`ExternalConfig/export-flow-setting/`** — `k-export-flow` 管线配置(`pipeline.yml`、`post-process-deps.yml` 等),路径相对于消费项目根目录。
 4. **数据表与协议源文件** — Excel 设计表、`.proto` 文件,经工具链生成 TS/Lua/JSON。
 
 ## 工具链速查
 
-| 命令 | 作用 |
-|---|---|
+| 命令                                                                                                       | 作用                                                                                                                                                               |
+| ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `yarn export-proto -- --protoRootPath <dir> --sourcePath <dir> --targetTsPath <dir> --targetLuaPath <dir>` | 导出协议代码(增量:`--increment`)。可选:`--bundleJsPath`/`--bundleDtsPath`/`--distBundleJsPath`/`--monoProtoPath`/`--protocolRegisterModule`/`--incrementCachePath` |
-| `yarn localization-tool` | 本地化工具;`translate`/`replace-res`/`gen-config` 子命令需 `--project-root <消费项目根目录>`(默认当前目录) |
-| `yarn sentry-log` | Sentry 日志解密 CLI |
-| `yarn sentry-error-tracer` | Sentry 错误追踪(需 `SENTRY_AUTH_TOKEN`;可选 `TS_PROJECT_ROOT`、`JENKINS_SOURCEMAP_BASE_URL`) |
-| `node scripts/verify-lua-json-consistency.js <lua-file> <json-file> [--max-mismatches=N]` | 校验 Lua 与 JSON 一致性 |
+| `yarn localization-tool`                                                                                   | 本地化工具;`translate`/`replace-res`/`gen-config` 子命令需 `--project-root <消费项目根目录>`(默认当前目录)                                                         |
+| `yarn sentry-log`                                                                                          | Sentry 日志解密 CLI                                                                                                                                                |
+| `yarn sentry-error-tracer`                                                                                 | Sentry 错误追踪(需 `SENTRY_AUTH_TOKEN`;可选 `TS_PROJECT_ROOT`、`JENKINS_SOURCEMAP_BASE_URL`)                                                                       |
+| `node scripts/verify-lua-json-consistency.js <lua-file> <json-file> [--max-mismatches=N]`                  | 校验 Lua 与 JSON 一致性                                                                                                                                            |
 
 > `export-proto-to-kts` 通过 `--protocolRegisterModule <模块名>` 在生成的 index.ts 中输出协议注册代码(模块需导出 `registerC2SProtocol`/`registerS2CProtocol`);不传则只生成纯类型导出。工具不内置任何项目路径。
 

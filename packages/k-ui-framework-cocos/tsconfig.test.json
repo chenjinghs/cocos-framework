@@ -1,0 +1,14 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "composite": false,
+        "types": ["node"],
+        "paths": {
+            "k-ts-framework": ["./../k-ts-framework/src/index.ts"],
+            "k-ui-framework": ["./../k-ui-framework/src/index.ts"],
+            "k-ts-framework-cocos": ["./../k-ts-framework-cocos/src/index.ts"],
+            "cc": ["./../k-ts-framework-cocos/tests/_mocks/cc.ts"]
+        }
+    },
+    "include": ["src", "tests", "../k-ts-framework/src", "../k-ui-framework/src", "../k-ts-framework-cocos/src"]
+}

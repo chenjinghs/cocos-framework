@@ -1,8 +1,10 @@
 {
     "extends": "../../tsconfig.base.json",
     "compilerOptions": {
-        "rootDir": "src",
-        "outDir": "dist"
+        "composite": false,
+        "paths": {
+            "k-ts-framework": ["./../k-ts-framework/src/index.ts"]
+        }
     },
-    "references": [{ "path": "../k-ts-framework" }]
+    "include": ["src"]
 }

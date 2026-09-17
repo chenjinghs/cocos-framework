@@ -5,13 +5,9 @@ import { ENTRY_PATCH_URL, ETrackingPoint, FILE_LIST_FILE_NAME, IEngine, IPatchAp
 import { DEFAULT_GAME_LANGUAGE, EGameLanguage, findGameLanguage, HiddenLanguages } from "./LanguageDefine";
 import { IFileInfo, IManifestInfo, IPatchInfo, getBestPatchFileInfo, resolveTargetLanguage } from "patch-common";
 // import * as https from "https";
-import { assert, calculateFileSha256, delay, fs, path, trackPoint } from "./Util";
+import { assert, calculateFileSha256, delay, fs, getSystemLanguage, keyValueStorage, path, trackPoint } from "./Util";
 
-
-const LANGUAGE_MATCHER_TEMPLATES = [
-    "^packages/<lang>/",
-    "^packages/deflate_config_<lang>\\.zip$",
-];
+const LANGUAGE_MATCHER_TEMPLATES = ["^packages/<lang>/", "^packages/deflate_config_<lang>\\.zip$"];
 
 type TOrganizeStatus = "success" | "missing-source" | "failed";
 
@@ -45,7 +41,7 @@ async function startImp(engine: IEngine, localBuiltinLanguages: string[], localD
     let tmpPath = `${manifestPath}.tmp`;
     let bakPath = `${manifestPath}.bak`;
     if (!fs.existsSync(manifestPath)) {
-        let recoverySource = fs.existsSync(tmpPath) ? tmpPath : (fs.existsSync(bakPath) ? bakPath : undefined);
+        let recoverySource = fs.existsSync(tmpPath) ? tmpPath : fs.existsSync(bakPath) ? bakPath : undefined;
         if (recoverySource) {
             try {
                 fs.replaceFileSync(recoverySource, manifestPath);
@@ -194,7 +190,7 @@ async function startImp(engine: IEngine, localBuiltinLanguages: string[], localD
             });
         } else {
             // server模式下，entryUrl + ENTRY_PATCH_URL 是服务器请求地址
-            let lastAccountId = CS.KPlayerPrefs.GetString("global.LastAccountId", "");
+            let lastAccountId = keyValueStorage.getString("global.LastAccountId", "");
             console.log(`lastAccountId: ${lastAccountId}`);
             fetchResult = await fetchRemoteData(
                 engine,
@@ -415,9 +411,10 @@ async function startImp(engine: IEngine, localBuiltinLanguages: string[], localD
             trackPoint(engine, ETrackingPoint.MoveScriptToApplyPath, `path: ${applyPatcherPath}`);
 
             // 再次更新manifest
-            let manifestWriteSucceed = manifestInfo.currentVersion === localAppVersion
-                ? writePatcherRetryManifest(engine, manifestInfo, localAppVersion)
-                : updateManifestFile(engine, manifestInfo, fileToInfo, ETrackingPoint.MoveScriptToApplyPath);
+            let manifestWriteSucceed =
+                manifestInfo.currentVersion === localAppVersion
+                    ? writePatcherRetryManifest(engine, manifestInfo, localAppVersion)
+                    : updateManifestFile(engine, manifestInfo, fileToInfo, ETrackingPoint.MoveScriptToApplyPath);
             if (!manifestWriteSucceed) {
                 currentPatcherJsInfo.redirect = patchScriptSavePath;
                 await engine.onError(ETrackingPoint.UpdateManifestFile, `reason: ${ETrackingPoint.MoveScriptToApplyPath}`);
@@ -435,7 +432,6 @@ async function startImp(engine: IEngine, localBuiltinLanguages: string[], localD
         }
     }
     trackPoint(engine, ETrackingPoint.NoPatchScriptUpdate);
-
 
     let builtinLanguageSet = new Set(localBuiltinLanguages);
     let patchLanguages = Object.keys(newPatchInfo.channels?.languages ?? {});
@@ -466,7 +462,9 @@ async function startImp(engine: IEngine, localBuiltinLanguages: string[], localD
     let hasCurrentLanguageVersion = hasLanguageChannel ? hasLanguageVersion(manifestInfo, targetLanguage) : false;
     let currentLanguageVersion = hasLanguageChannel ? getLanguageVersion(manifestInfo, targetLanguage, localAppVersion) : undefined;
     let needLanguageUpdate = hasLanguageChannel && (!hasCurrentLanguageVersion || (currentLanguageVersion ?? localAppVersion) < newVersion);
-    console.log(`patch channels info: builtinLanguages=${localBuiltinLanguages}, currentLanguage=${currentLanguage}, targetLanguage=${targetLanguage}, commonVersion=${currentCommonVersion}, languageVersion=${currentLanguageVersion}, hasCurrentLanguageVersion=${hasCurrentLanguageVersion}, needCommonUpdate=${needCommonUpdate}, needLanguageUpdate=${needLanguageUpdate}`);
+    console.log(
+        `patch channels info: builtinLanguages=${localBuiltinLanguages}, currentLanguage=${currentLanguage}, targetLanguage=${targetLanguage}, commonVersion=${currentCommonVersion}, languageVersion=${currentLanguageVersion}, hasCurrentLanguageVersion=${hasCurrentLanguageVersion}, needCommonUpdate=${needCommonUpdate}, needLanguageUpdate=${needLanguageUpdate}`,
+    );
     if (!needCommonUpdate && !needLanguageUpdate) {
         let needWriteNoUpdateManifest = manifestInfo.currentVersion < newVersion || builtinLanguageVersionUpdated;
         if (manifestInfo.currentVersion < newVersion) {
@@ -532,7 +530,11 @@ async function startImp(engine: IEngine, localBuiltinLanguages: string[], localD
             // 直接返回失败，下次启动重新下载。common 渠道已落盘(currentVersion 已抬到 newVersion)，
             // 下次启动只需重试语言渠道下载，不会重复下载 common。
             // currentVersion 已在 common 更新时抬到 newVersion，无需额外同步。
-            trackPoint(engine, ETrackingPoint.LanguageUpdateFailedUseLocal, `targetLanguage: ${targetLanguage}, commonVersion: ${manifestInfo.currentVersion}, languageVersion: ${currentLanguageVersion}`);
+            trackPoint(
+                engine,
+                ETrackingPoint.LanguageUpdateFailedUseLocal,
+                `targetLanguage: ${targetLanguage}, commonVersion: ${manifestInfo.currentVersion}, languageVersion: ${currentLanguageVersion}`,
+            );
             return;
         }
     }
@@ -625,10 +627,7 @@ function isFileInfoArray(value: unknown): value is IFileInfo[] {
     return value.every((item: unknown) => {
         if (typeof item !== "object" || item === null) return false;
         let info = item as Partial<IFileInfo>;
-        return typeof info.path === "string"
-            && Number.isFinite(info.version)
-            && typeof info.sha256 === "string"
-            && Number.isFinite(info.size);
+        return typeof info.path === "string" && Number.isFinite(info.version) && typeof info.sha256 === "string" && Number.isFinite(info.size);
     });
 }
 
@@ -693,10 +692,11 @@ function createBaseManifest(localAppVersion: number, previousManifest?: IManifes
         currentVersion: localAppVersion,
         languageVersions: { ...languages },
         // exclude builtin language files (they're in StreamingAssets, not in applyPath hot-update)
-        files: previousManifest?.files.filter((info) => {
-            let lang = getFileLanguage(info.path, languageNames);
-            return lang !== undefined && !builtinSet.has(lang);
-        }) ?? [],
+        files:
+            previousManifest?.files.filter((info) => {
+                let lang = getFileLanguage(info.path, languageNames);
+                return lang !== undefined && !builtinSet.has(lang);
+            }) ?? [],
     };
 }
 
@@ -742,9 +742,9 @@ function setLanguageVersion(manifestInfo: IManifestInfo, language: string, versi
 }
 
 function getCurrentGameLanguage(region?: string) {
-    let savedLanguage = CS.KPlayerPrefs.GetString("global.GameLanguage", "") as EGameLanguage;
+    let savedLanguage = keyValueStorage.getString("global.GameLanguage", "") as EGameLanguage;
     if (savedLanguage && savedLanguage.length > 0 && !HiddenLanguages.has(savedLanguage)) return savedLanguage;
-    return findGameLanguage(CS.UnityEngine.Application.systemLanguage, region) ?? DEFAULT_GAME_LANGUAGE;
+    return findGameLanguage(getSystemLanguage(), region) ?? DEFAULT_GAME_LANGUAGE;
 }
 
 async function updateChannel(
@@ -1014,9 +1014,10 @@ async function organizeDownloadFolder(
 
     if (!succeed) {
         missingSourceInfo = await findMissingRedirectSource(engine, pendingInfos, yieldIfNeeded);
-        let errorInfo = missingSourceInfo !== undefined
-            ? `reason: ${tag}, missing source: ${missingSourceInfo.redirect}, target: ${path.join(engine.applyPath, missingSourceInfo.path)}`
-            : `reason: ${tag}, error: ${lastError}`;
+        let errorInfo =
+            missingSourceInfo !== undefined
+                ? `reason: ${tag}, missing source: ${missingSourceInfo.redirect}, target: ${path.join(engine.applyPath, missingSourceInfo.path)}`
+                : `reason: ${tag}, error: ${lastError}`;
         trackPoint(engine, ETrackingPoint.OrganizeDownloadFolderFailed, errorInfo);
         return { status: missingSourceInfo !== undefined ? "missing-source" : "failed", info: errorInfo };
     }

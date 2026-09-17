@@ -6,3 +6,5 @@ package-lock.json
 .svn
 minigame-dist
 .webpack-cache
+scripts/sentry-error-tracer/.env
+tmp/

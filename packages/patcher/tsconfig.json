@@ -1,13 +1,10 @@
 {
     "extends": "../../tsconfig.base.json",
     "compilerOptions": {
-        "rootDir": "src",
-        "outDir": "dist"
-    },
-    "include": ["src/**/*.ts"],
-    "references": [
-        {
-            "path": "../patch-common"
+        "composite": false,
+        "paths": {
+            "patch-common": ["./../patch-common/src/index.ts"]
         }
-    ]
+    },
+    "include": ["src"]
 }

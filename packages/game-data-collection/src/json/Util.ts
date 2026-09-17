@@ -76,7 +76,7 @@ export function registerCustomJsonType(type: ICustomJsonType) {
 }
 
 export function parseJson(path: string) {
-    let data = CS.NewResourceUtil.ReadTextFile(path);
+    let data = F.Engine.readTextFile(path);
     return jsonUtil.parse(data);
     // return SuperJSON.parse(data);
 

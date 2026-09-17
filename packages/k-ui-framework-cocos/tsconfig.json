@@ -1,0 +1,12 @@
+{
+    "extends": "../../tsconfig.base.json",
+    "compilerOptions": {
+        "composite": false,
+        "paths": {
+            "k-ts-framework": ["./../k-ts-framework/src/index.ts"],
+            "k-ui-framework": ["./../k-ui-framework/src/index.ts"],
+            "k-ts-framework-cocos": ["./../k-ts-framework-cocos/src/index.ts"]
+        }
+    },
+    "include": ["src"]
+}

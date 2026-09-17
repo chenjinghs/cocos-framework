@@ -1,0 +1,18 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "composite": true,
+        "rootDir": "./src",
+        "outDir": "./dist",
+        "tsBuildInfoFile": "./tsconfig.ts7.tsbuildinfo",
+        "paths": {}
+    },
+    "references": [
+        {
+            "path": "../patcher/tsconfig.ts7.json"
+        },
+        {
+            "path": "../patch-common/tsconfig.ts7.json"
+        }
+    ]
+}

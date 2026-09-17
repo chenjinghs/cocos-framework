@@ -1,0 +1,12 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "composite": false,
+        "types": ["node"],
+        "paths": {
+            "k-ts-framework": ["./../k-ts-framework/src/index.ts"],
+            "cc": ["./tests/_mocks/cc.ts"]
+        }
+    },
+    "include": ["src", "tests", "../k-ts-framework/src"]
+}

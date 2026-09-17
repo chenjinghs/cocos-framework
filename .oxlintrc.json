@@ -1,12 +1,8 @@
 {
     "$schema": "./node_modules/oxlint/configuration_schema.json",
-    "ignorePatterns": [
-        "**/node_modules/**",
-        "**/dist/**"
-    ],
+    "ignorePatterns": ["**/node_modules/**", "**/dist/**"],
     "globals": {
-        "CS": "writable",
-        "puer": "writable"
+        "jsb": "readonly"
     },
     "rules": {
         "accessor-pairs": ["error", { "setWithoutGet": true, "getWithoutSet": false }],
@@ -51,10 +47,7 @@
         "no-import-assign": "error",
         "no-inner-declarations": ["error", "both"],
         "no-invalid-regexp": "error",
-        "no-irregular-whitespace": [
-            "error",
-            { "skipStrings": true, "skipComments": false, "skipRegExps": true, "skipTemplates": true }
-        ],
+        "no-irregular-whitespace": ["error", { "skipStrings": true, "skipComments": false, "skipRegExps": true, "skipTemplates": true }],
         "no-iterator": "error",
         "no-labels": "error",
         "no-lone-blocks": "error",
@@ -82,15 +75,9 @@
         "no-unsafe-finally": "error",
         "no-unsafe-negation": "error",
         "no-unsafe-optional-chaining": "error",
-        "no-unused-expressions": [
-            "error",
-            { "allowShortCircuit": true, "allowTernary": true, "allowTaggedTemplates": true }
-        ],
+        "no-unused-expressions": ["error", { "allowShortCircuit": true, "allowTernary": true, "allowTaggedTemplates": true }],
         "no-unused-private-class-members": "error",
-        "no-unused-vars": [
-            "warn",
-            { "vars": "local", "args": "after-used", "argsIgnorePattern": "^_", "varsIgnorePattern": "^_|System$" }
-        ],
+        "no-unused-vars": ["warn", { "vars": "local", "args": "after-used", "argsIgnorePattern": "^_", "varsIgnorePattern": "^_|System$" }],
         "no-useless-backreference": "error",
         "no-useless-call": "error",
         "no-useless-catch": "error",
@@ -133,16 +120,9 @@
     },
     "overrides": [
         {
-            "files": [
-                "packages/k-export-flow/**",
-                "scripts/convert-excel-to-csv/**",
-                "scripts/patcher-builder/**"
-            ],
+            "files": ["packages/k-export-flow/**", "scripts/convert-excel-to-csv/**", "scripts/patcher-builder/**"],
             "rules": {
-                "no-unused-vars": [
-                    "warn",
-                    { "vars": "local", "args": "after-used", "argsIgnorePattern": "^_", "varsIgnorePattern": "System$" }
-                ]
+                "no-unused-vars": ["warn", { "vars": "local", "args": "after-used", "argsIgnorePattern": "^_", "varsIgnorePattern": "System$" }]
             }
         }
     ]

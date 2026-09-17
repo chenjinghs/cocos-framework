@@ -1,8 +1,9 @@
 import { DEFAULT_LOCALIZATION, EGameLanguage, findGameLanguage, ILocalization, LocalizationSet } from "./LanguageDefine";
+import { getSystemLanguage, keyValueStorage } from "./Util";
 
 export function getLocalization(): ILocalization {
-    let savedLanguage = CS.KPlayerPrefs.GetString("global.GameLanguage", "") as EGameLanguage | "";
-    let systemLanguage = CS.UnityEngine.Application.systemLanguage;
+    let savedLanguage = keyValueStorage.getString("global.GameLanguage", "") as EGameLanguage | "";
+    let systemLanguage = getSystemLanguage();
     let gameLanguage = savedLanguage || findGameLanguage(systemLanguage);
     return (gameLanguage ? LocalizationSet.get(gameLanguage) : undefined) ?? DEFAULT_LOCALIZATION;
 }
