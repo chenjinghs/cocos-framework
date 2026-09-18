@@ -2,7 +2,7 @@
     "compilerOptions": {
         "module": "node16",
         "target": "ES2022",
-        "lib": ["ES2022", "ES2024.Promise"],
+        "lib": ["ES2022"],
         "moduleResolution": "node16",
         "composite": true,
         "removeComments": true, // 删除编译后的所有的注释

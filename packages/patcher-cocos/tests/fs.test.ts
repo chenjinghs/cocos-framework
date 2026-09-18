@@ -66,6 +66,25 @@ test("rmSync 路径不存在视为成功，存在但删除失败抛错", () => {
         cleanup();
     }
 
+    test("readFileTextSync 缺失文件抛错；存在的空文件返回空串（jsb 失败返回空串而非 null 的语义）", () => {
+        let cleanup = installJsb({ isFileExist: () => false });
+        try {
+            assert.throws(() => createCocosFS().readFileTextSync("/missing"), /not exists/);
+        } finally {
+            cleanup();
+        }
+
+        cleanup = installJsb({
+            isFileExist: () => true,
+            getStringFromFile: () => "",
+        });
+        try {
+            assert.equal(createCocosFS().readFileTextSync("/empty"), "");
+        } finally {
+            cleanup();
+        }
+    });
+
     cleanup = installJsb({
         isFileExist: () => true,
         removeFile: () => false,

@@ -14,7 +14,7 @@
   // }
   "Import UI module": {
     "prefix": "iui",
-    "body": "import * as UI from \"k-ui-framework-unity\";"
+    "body": "import * as UI from \"k-ui-framework-cocos\";"
   },
   "Import KTS module": {
     "prefix": "ikts",
@@ -43,7 +43,7 @@
     "prefix": "nuiss",
     "body": [
       "import { D, F } from \"k-ts-framework\";",
-      "import * as UI from \"k-ui-framework-unity\";",
+      "import * as UI from \"k-ui-framework-cocos\";",
       "",
       "import { EWidget } from \"@game-define\";",
       "",

@@ -17,8 +17,8 @@ declare const jsb: {
         copyFile(srcPath: string, dstPath: string): boolean;
         writeStringToFile(data: string, path: string): boolean;
         writeDataToFile(data: Uint8Array, path: string): boolean;
-        getStringFromFile(path: string): string | null;
-        getDataFromFile(path: string): Uint8Array | null;
+        getStringFromFile(path: string): string;
+        getDataFromFile(path: string): Uint8Array;
         listFiles(path: string): string[] | null;
         getWritablePath(): string;
     };

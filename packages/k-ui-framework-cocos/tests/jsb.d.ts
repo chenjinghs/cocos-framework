@@ -2,6 +2,6 @@
 
 declare const jsb: {
     fileUtils: {
-        getStringFromFile(path: string): string | null;
+        getStringFromFile(path: string): string;
     };
 };

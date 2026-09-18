@@ -32,15 +32,14 @@ export function createCocosFS(): IFS {
     return {
         readFileTextSync: (filePath) => {
             if (!hasJSB()) unavailable("readFileTextSync");
-            let content = jsb.fileUtils.getStringFromFile(filePath);
-            if (content === null) throw new Error(`readFileTextSync failed, path not exists: ${filePath}`);
-            return content;
+            // jsb 读取失败返回空串而非 null，先查存在性（空文件是合法内容）
+            if (!jsb.fileUtils.isFileExist(filePath)) throw new Error(`readFileTextSync failed, path not exists: ${filePath}`);
+            return jsb.fileUtils.getStringFromFile(filePath);
         },
         readFileBufferSync: (filePath) => {
             if (!hasJSB()) unavailable("readFileBufferSync");
-            let content = jsb.fileUtils.getDataFromFile(filePath);
-            if (content === null) throw new Error(`readFileBufferSync failed, path not exists: ${filePath}`);
-            return content;
+            if (!jsb.fileUtils.isFileExist(filePath)) throw new Error(`readFileBufferSync failed, path not exists: ${filePath}`);
+            return jsb.fileUtils.getDataFromFile(filePath);
         },
         mkdirSync: (dirPath) => {
             if (!hasJSB()) unavailable("mkdirSync");

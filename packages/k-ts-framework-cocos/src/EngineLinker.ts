@@ -30,9 +30,9 @@ class CocosEngineSystem extends F.System {
     @D.linkUtil(readTextFileLinker)
     public readTextFileImpl(path: string): string {
         if (typeof jsb !== "undefined") {
-            let content = jsb.fileUtils.getStringFromFile(path);
-            if (content === null) throw new Error(`readTextFile failed, path not exists: ${path}`);
-            return content;
+            // jsb getStringFromFile 读取失败返回空串而非 null，先查存在性（空文件是合法内容）
+            if (!jsb.fileUtils.isFileExist(path)) throw new Error(`readTextFile failed, path not exists: ${path}`);
+            return jsb.fileUtils.getStringFromFile(path);
         }
 
         // 非 jsb 运行时（编辑器预览/web）：尝试 resources 里已缓存的 TextAsset

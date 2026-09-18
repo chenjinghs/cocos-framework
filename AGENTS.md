@@ -66,6 +66,7 @@ yarn tsc --noEmit -p packages/k-ts-framework/tsconfig.json
 - `ExportRunStats.ts` 输出分类前缀仍为旧项目布局硬编码,参数化时需同步更新 `tests/generate-schema-and-summary.test.ts`。
 - `scripts/localization-tool` 的目录布局约定(`ExternalConfig/...`、`TempSaved/...`)集中在 `src/Define.ts#resolvePaths`,接入非标布局的项目时改这一处。
 - 工具配置一律走参数/环境变量,不要把项目路径或密钥写回代码(参见 `sentry-error-tracer` 的 `SENTRY_AUTH_TOKEN` 环境变量改造)。
+- 跨包 System 类型化 subscribe 重载增强(`declare module "k-ts-framework/dist/framework/System"`,见 k-ui-framework/SubscriberExtension.ts 与 k-ts-framework-cocos 的 AsyncLoad/DelegateEvent):在 tsc -b project-references 构建下会因引用重定向与 paths 双通道身份分裂而幽灵化(仅类型层,运行时无影响)。仓库内唯一依赖点 `k-ui-framework-cocos/CocosUISystem.ts` 已显式透传绕过;消费项目若用 project-references 构建且调用增强重载遇 TS2769,同样处理。src 自检(tsconfig paths 已映射)与 node_modules dist 消费均正常合并。
 
 ## 不要做的事
 
