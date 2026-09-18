@@ -80,7 +80,9 @@ k-export-flow:独立,不依赖运行时核心
 
 1. **场景挂两个组件**:在场景任一节点挂 `KFrameworkBootstrap`(k-ts-framework-cocos)与 `CocosUISystem`(k-ui-framework-cocos),onLoad 时自动完成 `registerKFrameworkCocos()` / `registerCocosUI()` 装配(订阅器、linker、UI 系统创建)。
 2. **面板放置**:UI 面板 prefab 放 `resources/ui/<uiTag>.prefab`(常量 `UI_PANEL_PREFIX` 单点可改);wnd 模板经 `registerCocosUITemplate(tag, { wnd: { wndLayer } })` 注册,未注册默认 wndLayer 1。
-3. **热更新启动**:
+3. **面板操作入口**:`getPrefabProxy<T>(store)` / `findPrefabProxy<T>(store)` 获取面板代理(`PrefabProxyEx`,含 Label/Sprite/Button/Toggle/Slider/EditBox/ScrollView 常用方法)。
+4. **从 Unity 迁移注意**:`getUITemplate` linker 已由 k-ui-framework-cocos 默认实现(注册表 + 默认约定),消费项目**不要**再自行 `linkUtil(getUITemplate)`(linker 单链接,重复注册会在模块加载时断言失败);改用 `registerCocosUITemplate` 逐 tag 注册。
+5. **热更新启动**:
 
 ```ts
 import { startPatcher } from "patcher";
@@ -95,7 +97,7 @@ await startPatcher(engine, builtinLanguages, defaultLanguage);
 ```
 
 `IFS` 在非 jsb 运行时(编辑器预览/web)统一外抛,消费项目用 `registerPatcherCocos({ ... })` 按回调覆盖。
-数据表 JSON 经 `F.Engine.readTextFile` 同步读取:原生走 `jsb.fileUtils`,编辑器/ web 走 resources 已缓存的 TextAsset,可覆盖。
+数据表 JSON 经 `F.Engine.readTextFile` 同步读取:原生走 `jsb.fileUtils`,编辑器/web 走 resources 已缓存的 TextAsset。注意该 linker 由 k-ts-framework-cocos 单点链接、不可再覆盖;JSON 级自定义读取走 game-data-collection 的 `setJsonLoadFunc`。
 
 ## 使用本框架的游戏项目需要提供
 

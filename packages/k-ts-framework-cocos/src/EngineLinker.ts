@@ -40,7 +40,7 @@ class CocosEngineSystem extends F.System {
         let cached = resourcesCacheLookup.get?.(normalizedPath, cc.TextAsset) as cc.TextAsset | undefined;
         if (cached) return cached.text;
 
-        throw new Error("readTextFile: file system unavailable in this runtime, inject via F.Engine.readTextFile linker override");
+        throw new Error("readTextFile: 当前运行时无文件系统且 resources 无该缓存；jsb 原生或预加载 TextAsset 可用，JSON 数据表自定义读取请用 game-data-collection 的 setJsonLoadFunc");
     }
 }
 

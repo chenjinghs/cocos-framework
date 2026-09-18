@@ -208,6 +208,12 @@ declare module "cc" {
         language: string;
         isNative: boolean;
         isBrowser: boolean;
+        /** 键值存储（PlayerPrefs 语义对应物），web/原生均可用 */
+        localStorage: {
+            getItem(key: string): string | null;
+            setItem(key: string, value: string): void;
+            removeItem(key: string): void;
+        };
     };
 
     // /////////////////////////////////////////////////////////

@@ -1,8 +1,9 @@
 import { D, F } from "k-ts-framework";
-import { ASYNC_LOAD_AND_INSTANTIATE, cc, isValidNode, PrefabProxy } from "k-ts-framework-cocos";
+import { ASYNC_LOAD_AND_INSTANTIATE, cc, isValidNode } from "k-ts-framework-cocos";
 import { getUITemplate, IUITemplate, RUIStore, UIEngineInterface, UILogger, UITagType } from "k-ui-framework";
 
 import { COCOS_UI_SYSTEM_TAG, UI_PANEL_PREFIX, UI_ROOT_NAME } from "./Define";
+import { findPrefabProxy, getPrefabProxy, PrefabProxyEx } from "./PrefabProxyEx";
 import { _bindRes, _unbindRes } from "./PrivateUtil";
 
 /** uiTag -> 模板注册表（消费项目经 registerCocosUITemplate 覆盖） */
@@ -26,7 +27,7 @@ class CocosUIRootStore extends F.SingletonStore {
 class CocosUIStore extends F.Store {
     public isLoadedBySystem = false;
     public uiRes: cc.Node | null = null;
-    public prefabProxy: PrefabProxy | null = null;
+    public prefabProxy: PrefabProxyEx | null = null;
 }
 
 /**
@@ -125,7 +126,7 @@ class CocosUISystem extends F.System {
         UILogger.d(uiStore.uiTag, `bindUIRes, store.id:${uiStore.id}`);
 
         let store = CocosUIStore.create(uiStore);
-        let prefabProxy = new PrefabProxy(uiRes);
+        let prefabProxy = new PrefabProxyEx(uiRes);
         this.modify(store, (v) => {
             v.uiRes = uiRes;
             v.prefabProxy = prefabProxy;
@@ -198,5 +199,17 @@ class CocosUISystem extends F.System {
         ordered.forEach(([node], index) => {
             if (node.getSiblingIndex() !== index) node.setSiblingIndex(index);
         });
+    }
+
+    @D.linkUtil(findPrefabProxy)
+    public findPrefabProxyImpl(store: F.RStore) {
+        return F.findStoreChildByCtor(store, CocosUIStore)?.prefabProxy ?? undefined;
+    }
+
+    @D.linkUtil(getPrefabProxy)
+    public getPrefabProxyImpl(store: F.RStore) {
+        let proxy = this.findPrefabProxyImpl(store);
+        F.assert(proxy, `getPrefabProxy failed, store ${store.constructor.name} has no bound prefab`);
+        return proxy;
     }
 }

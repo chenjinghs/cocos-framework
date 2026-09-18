@@ -45,12 +45,16 @@ class DelegateSubscriber implements F.ISubscriber {
     }
 }
 
+let delegateSubscriberRegistered = false;
+
 /** 注册 cc 组件事件桥接订阅器（由 registerKFrameworkCocos 调用，幂等） */
 export function registerDelegateSubscriber() {
+    if (delegateSubscriberRegistered) return;
     F.HookUtil.get(F.SubscribeHook).registerSubscriber(DelegateSubscriber);
+    delegateSubscriberRegistered = true;
 }
 
-declare module "k-ts-framework" {
+declare module "k-ts-framework/dist/framework/System" {
     export interface System {
         /**
          * 订阅 cc 事件

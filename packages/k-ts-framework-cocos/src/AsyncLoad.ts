@@ -236,12 +236,16 @@ class AsyncLoadSubscriber implements F.ISubscriber {
     }
 }
 
+let asyncLoadSubscriberRegistered = false;
+
 /** 注册异步加载订阅器（由 registerKFrameworkCocos 调用，幂等） */
 export function registerAsyncLoadSubscriber() {
+    if (asyncLoadSubscriberRegistered) return;
     F.HookUtil.get(F.SubscribeHook).registerSubscriber(AsyncLoadSubscriber);
+    asyncLoadSubscriberRegistered = true;
 }
 
-declare module "k-ts-framework" {
+declare module "k-ts-framework/dist/framework/System" {
     export interface System {
         /**
          * 订阅异步加载

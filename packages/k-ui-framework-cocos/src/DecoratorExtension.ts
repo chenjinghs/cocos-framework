@@ -70,7 +70,8 @@ class UICocosDecoratorOperator extends F.HookOperatorBase {
     // 绑定时应用
     public bindRegisteredEvent(store: F.RStore, prefabProxy: PrefabProxy) {
         let systemCtor = F.getStoreOwnerCtor(store);
-        F.assert(systemCtor, "bindRegisteredEvent failed, store owner ctor is null");
+        // 无属主系统的 store 不可能注册了 prefab 事件（注册表以 system ctor 为键），直接跳过
+        if (systemCtor === undefined) return;
         let eventInfoList = this.prefabEventRegistries.get(systemCtor);
         if (eventInfoList === undefined || eventInfoList.length === 0) return;
 
@@ -92,7 +93,7 @@ class UICocosDecoratorOperator extends F.HookOperatorBase {
 
     public unbindRegisteredEvent(store: F.RStore) {
         let systemCtor = F.getStoreOwnerCtor(store);
-        F.assert(systemCtor, "unbindRegisteredEvent failed, store owner ctor is null");
+        if (systemCtor === undefined) return;
         let subscribeHelper = this.subscribeHelperMap.get(systemCtor);
         let handles = this.eventHandles.get(store.id);
         handles?.forEach((handle) => subscribeHelper?.unsubscribeWithHandle(handle));
@@ -107,7 +108,9 @@ class UICocosDecoratorOperator extends F.HookOperatorBase {
         for (let { objectName, propertyName, prefabTag, params, isChildren } of prefabBindInfoList) {
             let child = prefabProxy.getChild(objectName);
             F.assert(child, `bindRegisteredPrefab failed, cannot find [${objectName}]`);
-            let prefabStore = isChildren ? child.getNode().children.map((node) => bindPrefab(store, node, prefabTag, params)) : bindPrefab(store, child.getNode(), prefabTag, params);
+            let prefabStore = isChildren
+                ? child.getNode().children.map((node, index) => bindPrefab(store, node, prefabTag, params === undefined ? undefined : Array.isArray(params) ? params[index] : params))
+                : bindPrefab(store, child.getNode(), prefabTag, params);
             Object.defineProperty(store, propertyName, { value: prefabStore, configurable: true, writable: true });
         }
     }

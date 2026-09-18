@@ -16,7 +16,12 @@ function downloadFileWithXHR(url: string, savePath: string, onProgressChanged?: 
         return Promise.reject(new Error("onDownloadFile: XMLHttpRequest unavailable in this runtime, override via registerPatcherCocos"));
     }
 
-    const { promise, resolve, reject } = Promise.withResolvers<void>();
+    let resolve!: () => void;
+    let reject!: (err: unknown) => void;
+    let promise = new Promise<void>((res, rej) => {
+        resolve = res;
+        reject = rej;
+    });
     let xhr = new XMLHttpRequest();
     xhr.open("GET", url, true);
     xhr.responseType = "arraybuffer";
@@ -47,6 +52,10 @@ function downloadFileWithXHR(url: string, savePath: string, onProgressChanged?: 
 export function buildDefaultCocosEngine(overrides: Partial<IEngine> = {}): IEngine {
     let updateUI = new UpdateUI();
 
+    // 最小 UI 惰性打开：首次进度/错误回调时挂载（open 内部幂等）；
+    // Unity 版在 onApplyCurrentManifest 显式打开，Cocos 默认实现不处理 manifest 挂载语义，故改为惰性
+    let ensureUpdateUIOpen = () => updateUI.open("更新中");
+
     let engine: IEngine = {
         entryUrl: "",
         downloadPath: "patch/download",
@@ -63,14 +72,21 @@ export function buildDefaultCocosEngine(overrides: Partial<IEngine> = {}): IEngi
         onResetToBuiltinResources: () => {},
         onCheckNetwork: async () => typeof navigator === "undefined" || navigator.onLine !== false,
         onTrackPoint: (tag, info) => console.log(`[TrackPoint] ${tag} ${info ?? ""}`),
-        onDownloadProgressChanged: (current, total) => updateUI.setDownloadProgress(current, total),
-        onOrganizeProgressChanged: (currentFiles, totalFiles) => updateUI.setOrganizeProgress(currentFiles, totalFiles),
+        onDownloadProgressChanged: (current, total) => {
+            ensureUpdateUIOpen();
+            updateUI.setDownloadProgress(current, total);
+        },
+        onOrganizeProgressChanged: (currentFiles, totalFiles) => {
+            ensureUpdateUIOpen();
+            updateUI.setOrganizeProgress(currentFiles, totalFiles);
+        },
         onComplete: (_result, reason, newVersion) => {
             console.log(`[Patcher] complete: ${reason}, newVersion: ${newVersion}`);
             updateUI.close();
         },
         onError: async (tag, msg) => {
             console.error(`[Patcher] error: ${tag}, msg: ${msg}`);
+            ensureUpdateUIOpen();
             updateUI.showError(msg);
         },
         onNewAppNeedDownload: async (url) => {
@@ -134,9 +150,10 @@ export function registerPatcherCocos(engineOverrides: Partial<IEngine> = {}): IE
     setFS(createCocosFS());
     setPath(path);
     setKeyValueStorage({
+        // PlayerPrefs 语义对应 cc.sys.localStorage（web/原生均可用）；运行时缺失时退回默认值
         getString: (key, defaultValue) => {
-            if (typeof jsb === "undefined") return defaultValue;
-            return jsb.fileUtils.getStringFromFile(key) ?? defaultValue;
+            if (typeof cc.sys.localStorage === "undefined") return defaultValue;
+            return cc.sys.localStorage.getItem(key) ?? defaultValue;
         },
     });
     setSystemLanguageProvider(() => {

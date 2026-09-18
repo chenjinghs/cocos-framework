@@ -5,10 +5,21 @@ export function normalizeResourcePath(path: string): string {
     return path.replace(/\.(prefab|png|jpg|jpeg|json|txt|textasset|spriteframe|asset)$/i, "");
 }
 
+/** ES2022 兼容的 Promise 解构（Cocos 原生 JSC < iOS 17.4 无 Promise.withResolvers） */
+function deferred<T>() {
+    let resolve!: (value: T) => void;
+    let reject!: (err: unknown) => void;
+    let promise = new Promise<T>((res, rej) => {
+        resolve = res;
+        reject = rej;
+    });
+    return { promise, resolve, reject };
+}
+
 async function loadBundle(bundleName: string): Promise<cc.Bundle> {
     if (bundleName === "resources") return cc.resources;
 
-    const { promise, resolve, reject } = Promise.withResolvers<cc.Bundle>();
+    const { promise, resolve, reject } = deferred<cc.Bundle>();
     cc.assetManager.loadBundle(bundleName, (err, bundle) => {
         if (err || bundle === null) reject(err ?? new Error(`loadBundle failed: ${bundleName}`));
         else resolve(bundle);
@@ -24,7 +35,7 @@ export async function loadAsset<T extends cc.Asset>(bundleName: string, path: st
     let normalizedPath = normalizeResourcePath(path);
     let bundle = await loadBundle(bundleName);
 
-    const { promise, resolve, reject } = Promise.withResolvers<T>();
+    const { promise, resolve, reject } = deferred<T>();
     bundle.load(normalizedPath, (err, asset) => {
         if (err || asset === null) reject(err ?? new Error(`load asset failed: ${bundleName}/${normalizedPath}`));
         else resolve(asset as T);
@@ -34,7 +45,7 @@ export async function loadAsset<T extends cc.Asset>(bundleName: string, path: st
 
 /** 加载场景，err 时 reject */
 export function loadScene(sceneName: string): Promise<void> {
-    const { promise, resolve, reject } = Promise.withResolvers<void>();
+    const { promise, resolve, reject } = deferred<void>();
     cc.director.loadScene(sceneName, (err) => {
         if (err) reject(err);
         else resolve();

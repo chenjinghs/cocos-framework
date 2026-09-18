@@ -4,6 +4,7 @@
         "composite": false,
         "paths": {
             "k-ts-framework": ["./../k-ts-framework/src/index.ts"],
+            "k-ts-framework/dist/framework/System": ["./../k-ts-framework/src/framework/System.ts"],
             "patcher": ["./../patcher/src/index.ts"],
             "patch-common": ["./../patch-common/src/index.ts"],
             "k-ts-framework-cocos": ["./../k-ts-framework-cocos/src/index.ts"]

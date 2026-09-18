@@ -19,10 +19,11 @@ let registered = false;
  */
 export function registerCocosUI(): void {
     if (registered) return;
-    registered = true;
 
     registerKFrameworkCocos();
     F.System.createByTag(UI_SYSTEM_TAGS_FOR_COCOS);
+    // 全部注册成功后才置位：中途抛错不留下半装配状态
+    registered = true;
 }
 
 /**

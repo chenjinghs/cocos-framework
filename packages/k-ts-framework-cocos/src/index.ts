@@ -25,7 +25,6 @@ let registered = false;
  */
 export function registerKFrameworkCocos(): void {
     if (registered) return;
-    registered = true;
 
     // reason: NewByteArray 由 declare module 声明为 ambient function（只读类型层），运行时静态赋值需收窄
     const engineStatics = F.Engine as unknown as { NewByteArray: () => unknown };
@@ -33,6 +32,8 @@ export function registerKFrameworkCocos(): void {
     registerDelegateSubscriber();
     registerAsyncLoadSubscriber();
     registerEngineSystem();
+    // 全部注册成功后才置位：中途抛错（如重复注册断言）不留下半装配状态
+    registered = true;
 }
 
 /**

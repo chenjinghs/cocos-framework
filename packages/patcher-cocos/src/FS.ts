@@ -9,6 +9,21 @@ function hasJSB(): boolean {
     return typeof jsb !== "undefined";
 }
 
+/** 删除文件或目录：路径不存在视为成功（对齐 Unity File.Delete 语义），存在但删除失败抛错 */
+function removePath(path: string): void {
+    if (jsb.fileUtils.isDirectoryExist(path)) {
+        if (!jsb.fileUtils.removeDirectory(path)) throw new Error(`rm failed, cannot remove directory: ${path}`);
+    } else if (jsb.fileUtils.isFileExist(path)) {
+        if (!jsb.fileUtils.removeFile(path)) throw new Error(`rm failed, cannot remove file: ${path}`);
+    }
+}
+
+function sleep(ms: number): Promise<void> {
+    return new Promise<void>((resolve) => {
+        setTimeout(resolve, ms);
+    });
+}
+
 /**
  * Cocos 原生（jsb）文件系统实现。
  * 与 Unity 版语义对齐：Move 不覆盖目标；replaceFileSync 走 .bak 三步原子替换。
@@ -29,7 +44,8 @@ export function createCocosFS(): IFS {
         },
         mkdirSync: (dirPath) => {
             if (!hasJSB()) unavailable("mkdirSync");
-            jsb.fileUtils.createDirectory(dirPath);
+            // createDirectory 对已存在目录返回 true，保持与 Unity Directory.CreateDirectory 一致的幂等语义
+            if (!jsb.fileUtils.isDirectoryExist(dirPath) && !jsb.fileUtils.createDirectory(dirPath)) throw new Error(`mkdirSync failed: ${dirPath}`);
         },
         copyFileSync: (srcPath, destPath) => {
             if (!hasJSB()) unavailable("copyFileSync");
@@ -53,13 +69,24 @@ export function createCocosFS(): IFS {
         },
         rmSync: (path) => {
             if (!hasJSB()) unavailable("rmSync");
-            if (jsb.fileUtils.isDirectoryExist(path)) jsb.fileUtils.removeDirectory(path);
-            else jsb.fileUtils.removeFile(path);
+            removePath(path);
         },
+        // 与 Unity 版一致：瞬时失败重试 10 次（间隔 100ms），耗尽后抛错
         rmAsync: async (path) => {
             if (!hasJSB()) unavailable("rmAsync");
-            if (jsb.fileUtils.isDirectoryExist(path)) jsb.fileUtils.removeDirectory(path);
-            else jsb.fileUtils.removeFile(path);
+            let lastError: unknown;
+            for (let i = 0; i < 10; i++) {
+                let attemptError: unknown;
+                try {
+                    removePath(path);
+                } catch (e) {
+                    attemptError = e;
+                }
+                if (attemptError === undefined) return;
+                lastError = attemptError;
+                await sleep(100);
+            }
+            throw lastError;
         },
         existsSync: (path) => {
             if (!hasJSB()) unavailable("existsSync");

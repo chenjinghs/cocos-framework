@@ -3,8 +3,15 @@
     "compilerOptions": {
         "composite": false,
         "paths": {
-            "k-ts-framework": ["./../k-ts-framework/src/index.ts"]
+            "k-ts-framework": [
+                "./../k-ts-framework/src/index.ts"
+            ],
+            "k-ts-framework/dist/framework/System": [
+                "./../k-ts-framework/src/framework/System.ts"
+            ]
         }
     },
-    "include": ["src"]
+    "include": [
+        "src"
+    ]
 }

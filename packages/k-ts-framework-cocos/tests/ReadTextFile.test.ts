@@ -28,5 +28,5 @@ test("registerKFrameworkCocos 装配后 F.Engine.readTextFile 调到 cc 实现�
 
 test("readTextFile 未命中缓存时抛错（非 jsb 运行时外抛模式）", () => {
     registerKFrameworkCocos();
-    assert.throws(() => F.Engine.readTextFile("config/not_exist.json"), /unavailable/);
+    assert.throws(() => F.Engine.readTextFile("config/not_exist.json"), /setJsonLoadFunc/);
 });

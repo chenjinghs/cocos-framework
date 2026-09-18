@@ -12,7 +12,7 @@ export const ASYNC_OPEN_WND = Symbol("AsyncOpenWnd");
 export const openWndAsync = F.createUtilLinker<(wndTag: UITagType, params?: any, overrideLayer?: number, callback?: () => void) => { cancel: () => void }>();
 
 // prettier-ignore
-declare module "k-ts-framework" {
+declare module "k-ts-framework/dist/framework/System" {
     export interface System {
         /**
          * 异步创建一个 Prefab

@@ -4,7 +4,7 @@ import { bindPrefab, RUIStore } from "k-ui-framework";
 
 /**
  * PrefabProxy 的常用控件扩展子集（对齐 Unity 版 PrefabProxyUnityEx 的常用方法）。
- * 同时通过 declare module 增强基类，使 getPrefabProxy 返回值直接具备这些方法。
+ * CocosUISystem 绑定面板时创建的就是本类实例；消费项目经 findPrefabProxy/getPrefabProxy 获取。
  */
 export class PrefabProxyEx<T = unknown, K extends Extract<keyof T, string> = Extract<keyof T, string>> extends PrefabProxy<T, K> {
     // //////////////////////////////////////////////////////
@@ -129,3 +129,9 @@ export class PrefabProxyEx<T = unknown, K extends Extract<keyof T, string> = Ext
         return component;
     }
 }
+
+/** 查找 store 已绑定面板的 PrefabProxyEx（未绑定返回 undefined） */
+export const findPrefabProxy = F.createUtilLinker<<T>(store: F.RStore) => PrefabProxyEx<T> | undefined>();
+
+/** 获取 store 已绑定面板的 PrefabProxyEx（未绑定抛错） */
+export const getPrefabProxy = F.createUtilLinker<<T>(store: F.RStore) => PrefabProxyEx<T>>();
