@@ -12,7 +12,7 @@
     "dependencies": {
         "chokidar": "^4.0.1",
         "commander": "^11.1.0",
-        "exceljs": "git+https://git.shiyou.kingsoft.com/client/typescript/exceljs.git#fix-comments-issue",
+        "exceljs": "file:../../vendor/exceljs-4.4.0.tgz",
         "fs-extra": "^11.2.0",
         "glob": "^10.3.10",
         "p-limit": "^3.1.0",

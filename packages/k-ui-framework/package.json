@@ -12,6 +12,6 @@
     "dependencies": {
         "reflect-metadata": "0.1.13",
         "k-ts-framework": "*",
-        "json-util": "git+https://git.shiyou.kingsoft.com/client/typescript/json-util.git#v0.0.7"
+        "json-util": "file:../../vendor/json-util-0.0.1.tgz"
     }
 }

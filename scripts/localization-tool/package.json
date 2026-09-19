@@ -19,8 +19,8 @@
   "dependencies": {
     "commander": "^9.2.0",
     "detect-indent": "^7.0.1",
-    "exceljs": "^4.4.0",
-    "json-util": "git+https://git.shiyou.kingsoft.com/client/typescript/json-util.git#v0.0.7",
+    "exceljs": "file:../../vendor/exceljs-4.4.0.tgz",
+    "json-util": "file:../../vendor/json-util-0.0.1.tgz",
     "yaml": "^2.8.1"
   }
 }
