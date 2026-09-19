@@ -8,6 +8,8 @@
         "export-proto": "yarn --cwd ./scripts/export-proto-to-kts start",
         "export-proto-increment": "yarn export-proto --increment",
         "clean": "yarn rimraf -g ./{packages,scripts}/*/{dist,*.tsbuildinfo}",
+        "build": "yarn tsc -b packages/k-ui-framework-cocos/tsconfig.ts7.json && yarn fix-dist-imports",
+        "fix-dist-imports": "node scripts/fix-dist-imports.mjs",
         "lint": "yarn oxlint",
         "lint:fix": "yarn oxlint --fix",
         "format": "yarn oxfmt --disable-nested-config",

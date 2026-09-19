@@ -100,10 +100,14 @@ yarn tsc --noEmit -p packages/k-ts-framework-cocos/tsconfig.json
 
 # 真实构建：tsconfig.ts7.json 是包级构建图节点（project references），
 # 产物在各包 dist/（已 gitignore），构建信息写 *.ts7.tsbuildinfo
-yarn tsc -b packages/k-ts-framework/tsconfig.ts7.json
-yarn tsc -b packages/k-ts-framework-cocos/tsconfig.ts7.json
-yarn tsc -b packages/k-ui-framework/tsconfig.ts7.json
-yarn tsc -b packages/k-ui-framework-cocos/tsconfig.ts7.json
+# 推荐用 yarn build：tsc -b 连带构建 4 个运行时包，并自动跑 fix-dist-imports
+# （把 dist 里跨包裸导入改写为相对路径——3.8 编辑器 executor 解析不了
+#   node_modules 模块发起的裸包名导入，会报 F.Store/F.Engine undefined；
+#   预览目标是整包合并 chunk 不受影响。漏跑此步编辑器目标必崩）
+yarn build
+# 等价手动步骤：
+yarn tsc -b packages/k-ui-framework-cocos/tsconfig.ts7.json   # project references 连带其余 3 包
+node scripts/fix-dist-imports.mjs
 
 # 清理全部构建产物
 yarn clean
@@ -135,7 +139,7 @@ yarn clean
 - **workspace 方式**：把框架仓库与 Test 工程放进同一个 yarn workspace 根（根 `package.json` 的 `workspaces` 同时包含两边），用 `"k-ts-framework": "*"` 引用——改框架代码即时生效，适合要跟着框架开发的情况；
 - **git 依赖方式**：`"k-ts-framework": "git+<内网仓库地址>#<版本>"`，适合只消费不修改。
 
-无论哪种方式：先按第 5 节构建出被引用包的 `dist/`，再 `yarn` 安装链接；然后在 Test 工程的脚本里即可 `import { D, F } from "k-ts-framework"`。框架包是 ESM 包（`"type": "module"`、相对导入带 `.js` 后缀），Cocos Creator 3.8 与 4.0 均支持脚本从 node_modules 导入 npm 包。
+无论哪种方式：先按第 5 节构建出被引用包的 `dist/`（用 `yarn build`，含 fix-dist-imports 改写），再 `yarn` 安装链接；然后在 Test 工程的脚本里即可 `import { D, F } from "k-ts-framework"`。框架包是 ESM 包（`"type": "module"`、相对导入带 `.js` 后缀、dist 跨包导入已改写为相对路径），Cocos Creator 3.8 与 4.0 均支持脚本从 node_modules 导入 npm 包。
 
 若还要接入 UI 框架，加 `k-ui-framework` + `k-ui-framework-cocos`；接入热更新，加 `patcher` + `patcher-cocos` + `patch-common`。
 

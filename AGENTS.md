@@ -17,6 +17,10 @@ yarn lint:fix         # 自动修复
 yarn format           # oxfmt 格式化
 yarn format:check     # 格式检查
 yarn clean            # 删除各包 dist 与 *.tsbuildinfo
+yarn build            # 构建运行时 4 包 dist(tsc -b,project references 连带 4 包)
+                      # 并自动跑 fix-dist-imports:把 dist 跨包裸导入改写为相对路径——
+                      # Creator 3.8 编辑器 executor 解析不了 node_modules 模块发起的
+                      # 裸包名导入(报 F.Store/F.Engine undefined),必须改写,漏跑会崩
 
 # 测试(node:test + tsx,无单独框架)
 yarn --cwd packages/k-export-flow test           # 82 个测试
