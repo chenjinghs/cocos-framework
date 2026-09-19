@@ -2,7 +2,7 @@ import { Action, StoreAction } from "../framework/Action.js";
 import { Event, StoreEvent } from "../framework/Event.js";
 import { Constructor, EDataInheritType } from "../framework/Interface.js";
 import { Store, StoreProxy } from "../framework/Store.js";
-import { assert, stacktrace } from "../global/index.js";
+import { assert, stacktrace } from "../global/GlobalFunctions.js";
 import { HookType } from "./HookDefine.js";
 import { HookOperatorBase, HookUtil } from "./HookUtilImpl.js";
 

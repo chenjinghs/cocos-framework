@@ -1,7 +1,7 @@
 import { D } from "../framework/Decorator.js";
 import { Env } from "../framework/Env.js";
 import { Constructor, getManager, IEnvData, IStartAsyncExtraOutput, SystemConstructor } from "../framework/Interface.js";
-import { assert, getStackTraceInfo } from "../global/index.js";
+import { assert, getStackTraceInfo } from "../global/GlobalFunctions.js";
 import { cancelAsyncChainIfAllParentsDestroyed } from "./AsyncInfo.js";
 import { HookType, HookUtil } from "./HookDefine.js";
 

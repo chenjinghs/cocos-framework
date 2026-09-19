@@ -2,7 +2,7 @@ import { Action, StoreAction } from "../framework/Action.js";
 import { D } from "../framework/Decorator.js";
 import { Event, StoreEvent } from "../framework/Event.js";
 import { Constructor, EDataInheritType } from "../framework/Interface.js";
-import { assert } from "../global/index.js";
+import { assert } from "../global/GlobalFunctions.js";
 import { HookType, HookUtil } from "./HookDefine.js";
 import { HookOperatorBase } from "./HookUtilImpl.js";
 

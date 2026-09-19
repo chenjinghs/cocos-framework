@@ -45,6 +45,7 @@ yarn tsc --noEmit -p packages/k-ts-framework/tsconfig.json
 - 目标运行时包含微信小游戏:不要直接依赖 node 内置模块。
 - 新代码一律 ESM `import`;存量代码有 `require` 调用(oxlint `no-require-imports` 存量错误),改动到这些文件时顺手改为 import。
 - 运行时 4 包(`k-ts-framework`/-cocos、`k-ui-framework`/-cocos)是 `"type": "module"` 的 ESM 包:src 相对导入/再导出必须带显式 `.js` 后缀,纯类型的具名再导出必须 `export type`(node16 ESM 类型检查与 Creator 3.8/4.0 的 node_modules ESM 解析双重要求);`declare module` 增强说明符同理。
+- **包内禁止循环 import**:3.8 编辑器按模块分 chunk 执行,环上的绑定会被注入 undefined(如 `F.Store extends 崩溃`)。k-ts-framework 曾整体成环(Event⇄HookUtilImpl⇄System⇄SubscribeHook⇄Decorator⇄UtilLinker⇄Engine⇄global/index⇄Store⇄Action),成因是 `Store/Router/StoreReadonlyChecker/UtilLinker` 经 `global/index.js` 桶文件导入 `assert` 等——已改直导叶子模块 `global/GlobalFunctions.js` 破环;**新增导入时不要从 `global/index.js` 这类桶文件取符号**。
 
 ## 架构要点
 
