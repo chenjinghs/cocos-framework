@@ -1,6 +1,6 @@
 import { F } from "k-ts-framework";
 
-import { IUIStateTemplate } from "./Define";
+import { IUIStateTemplate } from "./Define.js";
 
 /**
  * 获取 UI State 配置信息(项目实现)

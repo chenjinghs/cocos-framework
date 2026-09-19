@@ -1,9 +1,9 @@
-import { Env } from "../framework/Env";
-import { CallbackType, Constructor } from "../framework/Interface";
-import { System } from "../framework/System";
-import { assert } from "../global/GlobalFunctions";
-import { HookOperatorBase, HookType } from "./HookUtilImpl";
-import { ISubscriber, SubscribeHelper, SubscribeInstanceInfo, SubscriberRegistry } from "./Subscriber";
+import { Env } from "../framework/Env.js";
+import { CallbackType, Constructor } from "../framework/Interface.js";
+import { System } from "../framework/System.js";
+import { assert } from "../global/GlobalFunctions.js";
+import { HookOperatorBase, HookType } from "./HookUtilImpl.js";
+import { ISubscriber, SubscribeHelper, SubscribeInstanceInfo, SubscriberRegistry } from "./Subscriber.js";
 
 class SubscribeInfo {
     public constructor(

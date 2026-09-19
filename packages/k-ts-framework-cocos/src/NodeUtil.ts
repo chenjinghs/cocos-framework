@@ -1,4 +1,4 @@
-import { cc } from "./cc";
+import { cc } from "./cc.js";
 
 /** 判断一个对象是否仍然是有效的 Node（已销毁/伪空返回 false） */
 export function isValidNode(value: unknown): value is cc.Node {

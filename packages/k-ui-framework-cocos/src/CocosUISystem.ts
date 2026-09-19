@@ -2,9 +2,9 @@ import { D, F } from "k-ts-framework";
 import { ASYNC_LOAD_AND_INSTANTIATE, cc, isValidNode } from "k-ts-framework-cocos";
 import { getUITemplate, IUITemplate, RUIStore, UIEngineInterface, UILogger, UITagType } from "k-ui-framework";
 
-import { COCOS_UI_SYSTEM_TAG, UI_PANEL_PREFIX, UI_ROOT_NAME } from "./Define";
-import { findPrefabProxy, getPrefabProxy, PrefabProxyEx } from "./PrefabProxyEx";
-import { _bindRes, _unbindRes } from "./PrivateUtil";
+import { COCOS_UI_SYSTEM_TAG, UI_PANEL_PREFIX, UI_ROOT_NAME } from "./Define.js";
+import { findPrefabProxy, getPrefabProxy, PrefabProxyEx } from "./PrefabProxyEx.js";
+import { _bindRes, _unbindRes } from "./PrivateUtil.js";
 
 /** uiTag -> 模板注册表（消费项目经 registerCocosUITemplate 覆盖） */
 const uiTemplateRegistry = new Map<UITagType, IUITemplate>();

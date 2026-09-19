@@ -1,6 +1,6 @@
-import { Env } from "../framework/Env";
-import { IEnvData, IStartAsyncExtraOutput, IStartAsyncParams, ISubscribeHelper } from "../framework/Interface";
-import { assert, getStackTraceInfo, getStackTraceInfoString, IStackTraceInfo } from "../global/GlobalFunctions";
+import { Env } from "../framework/Env.js";
+import { IEnvData, IStartAsyncExtraOutput, IStartAsyncParams, ISubscribeHelper } from "../framework/Interface.js";
+import { assert, getStackTraceInfo, getStackTraceInfoString, IStackTraceInfo } from "../global/GlobalFunctions.js";
 
 export const INVALID_ASYNC_HANDLE = Symbol("InvalidAsyncHandle");
 

@@ -2,7 +2,7 @@
  * 仓库自检用的最小 "cc" 模块声明。
  *
  * 仅覆盖框架源码引用到的 API 子集，宽松 unknown/泛型参数，不是完整引擎类型。
- * Cocos Creator 4.0 消费工程自带真实 cc 类型 —— 消费项目不要 include 本文件，
+ * Cocos Creator 3.8 / 4.0 消费工程自带真实 cc 类型 —— 消费项目不要 include 本文件，
  * 若出现重复声明，把本文件从 typeRoots 链路移出、改由仓库自检 tsconfig 显式 files 引入。
  */
 
@@ -329,4 +329,9 @@ declare module "cc" {
     // decorators
     export function ccclass(name?: string): ClassDecorator;
     export function property(...args: unknown[]): PropertyDecorator;
+    /** 3.8 的 ccclass/property 挂在 _decorator 下（4.0 两者皆有） */
+    export namespace _decorator {
+        function ccclass(name?: string): ClassDecorator;
+        function property(...args: unknown[]): PropertyDecorator;
+    }
 }

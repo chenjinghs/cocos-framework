@@ -1,6 +1,6 @@
 import { F } from "k-ts-framework";
 
-import { cc } from "./cc";
+import { cc } from "./cc.js";
 
 /**
  * cc.EventTarget 事件包装器，对齐 Unity 版 UnityEventWrapper 的语义：

@@ -1,6 +1,6 @@
-import { Store } from "../framework";
-import { StoreEvent } from "../framework/Event";
-import { RuntimeContext } from "./RuntimeContext";
+import { Store } from "../framework/index.js";
+import { StoreEvent } from "../framework/Event.js";
+import { RuntimeContext } from "./RuntimeContext.js";
 
 export class StoreCreateSEvent extends StoreEvent {}
 

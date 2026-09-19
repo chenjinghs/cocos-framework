@@ -1,9 +1,9 @@
 import { D, F } from "k-ts-framework";
 
-import { closeWnd, openWnd } from "../framework";
-import { UI_STATE_SYSTEM_TAG, UIStateStackStore } from "./Define";
-import { EnterUIStateSAction, ExitUIStateSAction, PauseUIStateSAction, ResumeUIStateSAction } from "./PublicAE";
-import { clearUIState, enterUIState, exitUIState, getUIStateTemplate } from "./Util";
+import { closeWnd, openWnd } from "../framework/index.js";
+import { UI_STATE_SYSTEM_TAG, UIStateStackStore } from "./Define.js";
+import { EnterUIStateSAction, ExitUIStateSAction, PauseUIStateSAction, ResumeUIStateSAction } from "./PublicAE.js";
+import { clearUIState, enterUIState, exitUIState, getUIStateTemplate } from "./Util.js";
 
 @D.system(UI_STATE_SYSTEM_TAG, UIStateStackStore)
 class UIStateSystem extends F.System {

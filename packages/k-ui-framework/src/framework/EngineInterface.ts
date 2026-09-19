@@ -4,7 +4,7 @@
 
 import { F } from "k-ts-framework";
 
-import { RUIStore, UIResType } from "./Define";
+import { RUIStore, UIResType } from "./Define.js";
 
 export namespace UIEngineInterface {
     /** 获取一个 UI 对应的引擎资源 */

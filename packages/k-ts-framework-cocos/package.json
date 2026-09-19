@@ -1,10 +1,11 @@
 {
     "name": "k-ts-framework-cocos",
     "version": "0.1.0",
-    "description": "k-ts-framework Cocos Creator 4.0 extension",
+    "description": "k-ts-framework Cocos Creator 3.8 / 4.0 extension",
     "author": "kingsoft",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
+    "type": "module",
     "scripts": {
         "test": "tsx --tsconfig ./tsconfig.test.json --test tests/*.test.ts",
         "typecheck": "tsc --noEmit -p tsconfig.json"

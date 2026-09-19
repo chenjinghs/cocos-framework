@@ -1,15 +1,15 @@
-import { Action, InferActionReturnType, InferStoreActionReturnType, StoreAction } from "../framework/Action";
-import { Event, StoreEvent } from "../framework/Event";
-import { Store } from "../framework/Store";
-import { assert, isChildOf } from "../global/GlobalFunctions";
-import { HookUtil } from "./HookUtilImpl";
-import { SubscribeHook, SystemThisArgPlaceholder } from "./SubscribeHook";
+import { Action, InferActionReturnType, InferStoreActionReturnType, StoreAction } from "../framework/Action.js";
+import { Event, StoreEvent } from "../framework/Event.js";
+import { Store } from "../framework/Store.js";
+import { assert, isChildOf } from "../global/GlobalFunctions.js";
+import { HookUtil } from "./HookUtilImpl.js";
+import { SubscribeHook, SystemThisArgPlaceholder } from "./SubscribeHook.js";
 
 type FunctionParamType<T> = T extends (param: infer P) => any ? P : never;
 type VerifyActionOrEvent<Type, TReturn> = Type extends Action<any> | Event ? TReturn : never;
 type VerifyStoreActionOrStoreEvent<Type, TReturn> = Type extends StoreAction<any> | StoreEvent ? TReturn : never;
 
-declare module "../framework/Decorator" {
+declare module "../framework/Decorator.js" {
     namespace D {
         /**
          * 订阅Action或者Event, 标记的函数参数必须为1个且为Action或者Event类型,

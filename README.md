@@ -1,6 +1,6 @@
 # K-TS Framework
 
-基于 **Cocos Creator 4.0**(TS 原生引擎,无 C# 侧)的 TypeScript 游戏开发框架。以 yarn workspaces monorepo 形式组织,包含游戏客户端运行时框架、数据导出管线、热更新补丁体系与配套工具链。
+基于 **Cocos Creator 3.8 / 4.0**(TS 原生引擎,无 C# 侧)的 TypeScript 游戏开发框架。运行时包为 ESM(`"type": "module"`),两个大版本均从 node_modules 原生加载,无需打包绕行。以 yarn workspaces monorepo 形式组织,包含游戏客户端运行时框架、数据导出管线、热更新补丁体系与配套工具链。
 
 本仓库是**通用框架**,不包含任何具体游戏业务逻辑。游戏项目以本框架为依赖,在自己的仓库/Cocos 工程中编写业务代码与数据表。
 
@@ -10,7 +10,7 @@
 | ------------- | --------------------------------------------------------------------- |
 | Node.js       | >= 20(开发/工具链)                                                    |
 | Yarn          | v1(classic,workspaces)                                                |
-| Cocos Creator | 4.0 运行时宿主(消费项目提供,本仓库仅做类型自检)                       |
+| Cocos Creator | 3.8 / 4.0 运行时宿主(消费项目提供,本仓库仅做类型自检)               |
 | 目标平台      | Cocos 原生(iOS/Android/Windows/ macOS)/ 编辑器预览 / Web / 微信小游戏 |
 
 ## 目录结构
@@ -76,9 +76,9 @@ k-export-flow:独立,不依赖运行时核心
 
 ## Cocos 接入
 
-消费项目的 Cocos Creator 4.0 工程:
+消费项目的 Cocos Creator 工程(3.8 / 4.0,框架包经 node_modules 原生加载):
 
-1. **场景挂两个组件**:在场景任一节点挂 `KFrameworkBootstrap`(k-ts-framework-cocos)与 `CocosUISystem`(k-ui-framework-cocos),onLoad 时自动完成 `registerKFrameworkCocos()` / `registerCocosUI()` 装配(订阅器、linker、UI 系统创建)。
+1. **场景挂两个组件**:在场景任一节点挂 `KFrameworkBootstrap`(k-ts-framework-cocos)与 `CocosUISystem`(k-ui-framework-cocos),onLoad 时自动完成 `registerKFrameworkCocos()` / `registerCocosUI()` 装配(订阅器、linker、UI 系统创建)。**3.8 注意**:node_modules 模块没有编辑器组件注册帧,装饰器会自动降级为透传(控制台有警告),此时改为在任一入口脚本直接调用这两个 `register*` 函数(幂等,效果相同)。
 2. **面板放置**:UI 面板 prefab 放 `resources/ui/<uiTag>.prefab`(常量 `UI_PANEL_PREFIX` 单点可改);wnd 模板经 `registerCocosUITemplate(tag, { wnd: { wndLayer } })` 注册,未注册默认 wndLayer 1。
 3. **面板操作入口**:`getPrefabProxy<T>(store)` / `findPrefabProxy<T>(store)` 获取面板代理(`PrefabProxyEx`,含 Label/Sprite/Button/Toggle/Slider/EditBox/ScrollView 常用方法)。
 4. **从 Unity 迁移注意**:`getUITemplate` linker 已由 k-ui-framework-cocos 默认实现(注册表 + 默认约定),消费项目**不要**再自行 `linkUtil(getUITemplate)`(linker 单链接,重复注册会在模块加载时断言失败);改用 `registerCocosUITemplate` 逐 tag 注册。
@@ -103,7 +103,7 @@ await startPatcher(engine, builtinLanguages, defaultLanguage);
 
 以下内容由消费项目生成或注入,本仓库刻意不包含:
 
-1. **`cc` 引擎类型** — Cocos 4.0 工程自带真实 cc 类型。框架自带的 `typing/cocos/cc.d.ts` 仅供仓库内 tsconfig 类型自检(最小 API 子集),消费项目**不要** include;若出现重复声明,把该文件从 `typeRoots` 链路移出、改由自检 tsconfig 显式引入。
+1. **`cc` 引擎类型** — Cocos 3.8 / 4.0 工程自带真实 cc 类型。框架自带的 `typing/cocos/cc.d.ts` 仅供仓库内 tsconfig 类型自检(最小 API 子集),消费项目**不要** include;若出现重复声明,把该文件从 `typeRoots` 链路移出、改由自检 tsconfig 显式引入。
 2. **`packages/patcher/src/LanguageDefine.ts` 与 `packages/patch-common/src/LanguageDefine.ts`** — 多语言枚举(`EGameLanguage` 等),由消费项目的 export-flow 管线生成(参考 `scripts/patcher-builder/src/LanguageChannelConfig.ts` 中的读取与校验);`patcher` 与 `patch-common` 编译前必须存在,语言列表变更后需重新生成。
 3. **`ExternalConfig/export-flow-setting/`** — `k-export-flow` 管线配置(`pipeline.yml`、`post-process-deps.yml` 等),路径相对于消费项目根目录。
 4. **数据表与协议源文件** — Excel 设计表、`.proto` 文件,经工具链生成 TS/Lua/JSON。

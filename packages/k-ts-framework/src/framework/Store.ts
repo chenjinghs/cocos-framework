@@ -1,5 +1,5 @@
-import { assert } from "../global";
-import { Constructor, getManager, IStore, NestedTag, StoreConstructor } from "./Interface";
+import { assert } from "../global/index.js";
+import { Constructor, getManager, IStore, NestedTag, StoreConstructor } from "./Interface.js";
 
 export type RStore = Readonly<Store>;
 

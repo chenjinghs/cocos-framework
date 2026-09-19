@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import { F } from "k-ts-framework";
-import { cc } from "../src/cc";
-import { registerKFrameworkCocos } from "../src/index";
+import { cc } from "../src/cc.js";
+import { registerKFrameworkCocos } from "../src/index.js";
 
 test("registerKFrameworkCocos 装配后 F.Engine.NewByteArray 可用", () => {
     registerKFrameworkCocos();

@@ -4,7 +4,7 @@ import { test } from "node:test";
 import { cc } from "k-ts-framework-cocos";
 import { findWnd, openWnd, UIEngineInterface } from "k-ui-framework";
 
-import { attachUIRootToScene, registerCocosUI, registerCocosUITemplate } from "../src/index";
+import { attachUIRootToScene, registerCocosUI, registerCocosUITemplate } from "../src/index.js";
 
 function setupSceneWithCanvas() {
     let scene = new cc.Scene("TestScene");

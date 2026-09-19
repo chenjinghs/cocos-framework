@@ -1,16 +1,16 @@
 /* eslint-disable @typescript-eslint/method-signature-style */
 /* eslint-disable @typescript-eslint/member-ordering */
-import { Action, ActionInnerUtil, StoreAction, StoreActionInnerUtil } from "../framework/Action";
-import { Env } from "../framework/Env";
-import { Event, EventInnerUtil, StoreEvent, StoreEventInnerUtil } from "../framework/Event";
-import { CallbackType, Constructor, IEnvData } from "../framework/Interface";
-import { Store } from "../framework/Store";
-import { System } from "../framework/System";
-import { assert, getStackTraceInfo, isChildOf, IStackTraceInfo } from "../global/GlobalFunctions";
-import { HookUtil } from "./HookDefine";
-import { StoreKeyHelper } from "./StoreKeyHelper";
-import { SubscribeHook } from "./SubscribeHook";
-import { checkArgsEqual, ISubscriber, SubscribeInstanceInfo, SubscriberRegistry, SubscriberWithKey } from "./Subscriber";
+import { Action, ActionInnerUtil, StoreAction, StoreActionInnerUtil } from "../framework/Action.js";
+import { Env } from "../framework/Env.js";
+import { Event, EventInnerUtil, StoreEvent, StoreEventInnerUtil } from "../framework/Event.js";
+import { CallbackType, Constructor, IEnvData } from "../framework/Interface.js";
+import { Store } from "../framework/Store.js";
+import { System } from "../framework/System.js";
+import { assert, getStackTraceInfo, isChildOf, IStackTraceInfo } from "../global/GlobalFunctions.js";
+import { HookUtil } from "./HookDefine.js";
+import { StoreKeyHelper } from "./StoreKeyHelper.js";
+import { SubscribeHook } from "./SubscribeHook.js";
+import { checkArgsEqual, ISubscriber, SubscribeInstanceInfo, SubscriberRegistry, SubscriberWithKey } from "./Subscriber.js";
 
 export function verifySubscriberCallback(
     info: SubscribeInstanceInfo,
@@ -36,7 +36,7 @@ export function verifySubscriberCallback(
 
 // /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Action
-declare module "../framework/System" {
+declare module "../framework/System.js" {
     export interface System {
         /**
          * 订阅 Action
@@ -145,7 +145,7 @@ ActionInnerUtil.dispatch = ActionSubscriber.dispatch;
 
 // /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // StoreAction
-declare module "../framework/System" {
+declare module "../framework/System.js" {
     export interface System {
         /**
          * 订阅 StoreAction
@@ -291,7 +291,7 @@ StoreActionInnerUtil.do = StoreActionSubscriber.do;
 
 // /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Event
-declare module "../framework/System" {
+declare module "../framework/System.js" {
     export interface System {
         /**
          * 订阅 Event
@@ -378,7 +378,7 @@ EventInnerUtil.dispatch = EventSubscriber.dispatch;
 
 // /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // StoreEvent
-declare module "../framework/System" {
+declare module "../framework/System.js" {
     export interface System {
         /**
          * 订阅 StoreEvent
@@ -552,7 +552,7 @@ export function setEnvTimer(env: number | string | Env, timreInfo: IEnvTimer) {
     foundEnv[0].getData(TimerEnvData).envTimer = timreInfo;
 }
 
-declare module "../framework/System" {
+declare module "../framework/System.js" {
     export interface System {
         /**
          * 订阅 Timer
@@ -651,7 +651,7 @@ HookUtil.get(SubscribeHook).registerSubscriber(TimerSubscriber);
 export const TIMER_NEXT_TICK = Symbol("TimerNextTick");
 export type TimerNextTickType = typeof TIMER_NEXT_TICK;
 
-declare module "../framework/System" {
+declare module "../framework/System.js" {
     export interface System {
         /**
          * 订阅 NextTick

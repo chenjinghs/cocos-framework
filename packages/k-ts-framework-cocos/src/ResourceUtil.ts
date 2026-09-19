@@ -1,4 +1,4 @@
-import { cc } from "./cc";
+import { cc } from "./cc.js";
 
 /** cc load 路径不允许带扩展名，这里做兜底剥离 */
 export function normalizeResourcePath(path: string): string {

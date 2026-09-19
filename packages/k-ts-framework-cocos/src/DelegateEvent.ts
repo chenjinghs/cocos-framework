@@ -1,7 +1,7 @@
 import { F } from "k-ts-framework";
 
-import { cc } from "./cc";
-import { CocosEventWrapper } from "./EventWrapper";
+import { cc } from "./cc.js";
+import { CocosEventWrapper } from "./EventWrapper.js";
 
 /**
  * 可订阅的 cc 事件描述：目标 EventTarget + 事件名。
@@ -54,7 +54,7 @@ export function registerDelegateSubscriber() {
     delegateSubscriberRegistered = true;
 }
 
-declare module "k-ts-framework/dist/framework/System" {
+declare module "k-ts-framework/dist/framework/System.js" {
     export interface System {
         /**
          * 订阅 cc 事件

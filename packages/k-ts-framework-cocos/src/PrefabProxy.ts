@@ -1,6 +1,6 @@
-import { cc } from "./cc";
+import { cc } from "./cc.js";
 
-import { isValidNode } from "./NodeUtil";
+import { isValidNode } from "./NodeUtil.js";
 
 /**
  * 面板/ prefab 节点的代理对象，对齐 Unity 版 PrefabProxy 的常用子集。

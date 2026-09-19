@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { cc } from "../src/cc";
-import { findNode } from "../src/NodeUtil";
-import { PrefabProxy } from "../src/PrefabProxy";
+import { cc } from "../src/cc.js";
+import { findNode } from "../src/NodeUtil.js";
+import { PrefabProxy } from "../src/PrefabProxy.js";
 
 function buildTree() {
     let root = new cc.Node("root");

@@ -1,9 +1,9 @@
 import { D, F } from "k-ts-framework";
-import { PrefabProxy, SupportedCocosEvent } from "k-ts-framework-cocos";
+import { cc, PrefabProxy, SupportedCocosEvent } from "k-ts-framework-cocos";
 import { bindPrefab, unbindPrefab } from "k-ui-framework";
 
-import { COCOS_UI_SYSTEM_TAG } from "./Define";
-import { _bindRes, _unbindRes } from "./PrivateUtil";
+import { COCOS_UI_SYSTEM_TAG } from "./Define.js";
+import { _bindRes, _unbindRes } from "./PrivateUtil.js";
 
 interface IPrefabEventInfo {
     objectName: string;
@@ -85,7 +85,8 @@ class UICocosDecoratorOperator extends F.HookOperatorBase {
             let child = prefabProxy.getChild(info.objectName);
             F.assert(child, `bindRegisteredEvent failed, cannot find [${info.objectName}]`);
             let finalCallback = (...args: unknown[]) => info.callback.call(systemInstance, store, ...args);
-            return subscribeHelper.subscribe(new SupportedCocosEvent(child.getNode(), info.eventName), finalCallback);
+            // 3.8 的 cc.Node 类型不继承 EventTarget(运行时的 on/off 签名一致),结构等价转换
+            return subscribeHelper.subscribe(new SupportedCocosEvent(child.getNode() as unknown as cc.EventTarget, info.eventName), finalCallback);
         });
 
         this.eventHandles.set(store.id, handles);

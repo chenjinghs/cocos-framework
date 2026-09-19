@@ -1,10 +1,10 @@
-import { Action, StoreAction } from "../framework/Action";
-import { Event, StoreEvent } from "../framework/Event";
-import { Constructor, EDataInheritType } from "../framework/Interface";
-import { Store, StoreProxy } from "../framework/Store";
-import { assert, stacktrace } from "../global";
-import { HookType } from "./HookDefine";
-import { HookOperatorBase, HookUtil } from "./HookUtilImpl";
+import { Action, StoreAction } from "../framework/Action.js";
+import { Event, StoreEvent } from "../framework/Event.js";
+import { Constructor, EDataInheritType } from "../framework/Interface.js";
+import { Store, StoreProxy } from "../framework/Store.js";
+import { assert, stacktrace } from "../global/index.js";
+import { HookType } from "./HookDefine.js";
+import { HookOperatorBase, HookUtil } from "./HookUtilImpl.js";
 
 let stackInfos: Array<Store | undefined> | undefined;
 let needsThrowError: boolean = true;

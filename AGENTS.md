@@ -4,7 +4,7 @@ AI 助手与贡献者的工作说明。先读 README.md 了解框架全貌。
 
 ## 仓库性质
 
-- **通用游戏开发框架**(Cocos Creator 4.0 / TypeScript,TS 原生引擎,无 C# 侧),不含具体游戏逻辑。数据表导出器(`single-table/DT*`)、游戏客户端入口、游戏构建管线属于消费项目,不应出现在本仓库。
+- **通用游戏开发框架**(Cocos Creator 3.8 / 4.0 / TypeScript,TS 原生引擎,无 C# 侧),不含具体游戏逻辑。数据表导出器(`single-table/DT*`)、游戏客户端入口、游戏构建管线属于消费项目,不应出现在本仓库。
 - **yarn v1 workspaces monorepo**:`packages/*` 与 `scripts/*` 都是 workspace。
 - 依赖永远从**仓库根目录**安装;**不要重建子目录的 yarn.lock**(已统一清理,安装一律以根 `yarn.lock` 为准)。
 
@@ -40,6 +40,7 @@ yarn tsc --noEmit -p packages/k-ts-framework/tsconfig.json
 - 运行时全局 `jsb`(Cocos 原生)已在 oxlint globals 声明;新增引擎全局需同步 `.oxlintrc.json`。
 - 目标运行时包含微信小游戏:不要直接依赖 node 内置模块。
 - 新代码一律 ESM `import`;存量代码有 `require` 调用(oxlint `no-require-imports` 存量错误),改动到这些文件时顺手改为 import。
+- 运行时 4 包(`k-ts-framework`/-cocos、`k-ui-framework`/-cocos)是 `"type": "module"` 的 ESM 包:src 相对导入/再导出必须带显式 `.js` 后缀,纯类型的具名再导出必须 `export type`(node16 ESM 类型检查与 Creator 3.8/4.0 的 node_modules ESM 解析双重要求);`declare module` 增强说明符同理。
 
 ## 架构要点
 
@@ -53,7 +54,7 @@ yarn tsc --noEmit -p packages/k-ts-framework/tsconfig.json
 
 | 注入点                                        | 提供者                    | 说明                                                                                                                                                         |
 | --------------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `cc` 引擎类型                                 | Cocos 4.0 工程自带        | 框架自带 `typing/cocos/cc.d.ts` 最小声明仅供仓库自检(`typeRoots` 链路),消费项目不要 include;若重复声明,把它移出 typeRoots、改由自检 tsconfig 显式 files 引入 |
+| `cc` 引擎类型                                 | Cocos 3.8 / 4.0 工程自带  | 框架自带 `typing/cocos/cc.d.ts` 最小声明仅供仓库自检(`typeRoots` 链路),消费项目不要 include;若重复声明,把它移出 typeRoots、改由自检 tsconfig 显式 files 引入 |
 | `packages/patcher/src/LanguageDefine.ts`      | 消费项目 export-flow 生成 | 多语言枚举,patcher 直接依赖;缺失时 patcher 测试与 typecheck 无法运行(预期)                                                                                   |
 | `packages/patch-common/src/LanguageDefine.ts` | 消费项目 export-flow 生成 | 同上,patch-common 也直接依赖;语言列表变更后需重新生成                                                                                                        |
 | `ExternalConfig/export-flow-setting/`         | 消费项目                  | k-export-flow 的 pipeline.yml / post-process-deps.yml                                                                                                        |
@@ -66,7 +67,7 @@ yarn tsc --noEmit -p packages/k-ts-framework/tsconfig.json
 - `ExportRunStats.ts` 输出分类前缀仍为旧项目布局硬编码,参数化时需同步更新 `tests/generate-schema-and-summary.test.ts`。
 - `scripts/localization-tool` 的目录布局约定(`ExternalConfig/...`、`TempSaved/...`)集中在 `src/Define.ts#resolvePaths`,接入非标布局的项目时改这一处。
 - 工具配置一律走参数/环境变量,不要把项目路径或密钥写回代码(参见 `sentry-error-tracer` 的 `SENTRY_AUTH_TOKEN` 环境变量改造)。
-- 跨包 System 类型化 subscribe 重载增强(`declare module "k-ts-framework/dist/framework/System"`,见 k-ui-framework/SubscriberExtension.ts 与 k-ts-framework-cocos 的 AsyncLoad/DelegateEvent):在 tsc -b project-references 构建下会因引用重定向与 paths 双通道身份分裂而幽灵化(仅类型层,运行时无影响)。仓库内唯一依赖点 `k-ui-framework-cocos/CocosUISystem.ts` 已显式透传绕过;消费项目若用 project-references 构建且调用增强重载遇 TS2769,同样处理。src 自检(tsconfig paths 已映射)与 node_modules dist 消费均正常合并。
+- 跨包 System 类型化 subscribe 重载增强(`declare module "k-ts-framework/dist/framework/System.js"`,见 k-ui-framework/SubscriberExtension.ts 与 k-ts-framework-cocos 的 AsyncLoad/DelegateEvent):ESM 化后说明符必须带 `.js` 后缀(3.8/4.0 的 node_modules ESM 解析与 node16 类型检查要求),各包 tsconfig paths 已同步映射 `.js` 键。src 自检、tsc -b project-references 构建、node_modules dist 消费三条链路均能正常合并;`k-ui-framework-cocos/CocosUISystem.ts` 的显式透传是历史绕过,保留无害。
 
 ## 不要做的事
 

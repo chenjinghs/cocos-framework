@@ -1,12 +1,12 @@
-import { Action, StoreAction } from "../framework/Action";
-import { Env } from "../framework/Env";
-import { Event, StoreEvent } from "../framework/Event";
-import { EDataInheritType, IEnvData, StoreConstructor } from "../framework/Interface";
-import { Store, StoreProxy } from "../framework/Store";
-import { System } from "../framework/System";
-import { assert } from "../global/GlobalFunctions";
-import { HookProcessor, HookType, HookUtil, IHookOperator, VerifyGetReturn } from "./HookDefine";
-import { SubscribeHelper } from "./Subscriber";
+import { Action, StoreAction } from "../framework/Action.js";
+import { Env } from "../framework/Env.js";
+import { Event, StoreEvent } from "../framework/Event.js";
+import { EDataInheritType, IEnvData, StoreConstructor } from "../framework/Interface.js";
+import { Store, StoreProxy } from "../framework/Store.js";
+import { System } from "../framework/System.js";
+import { assert } from "../global/GlobalFunctions.js";
+import { HookProcessor, HookType, HookUtil, IHookOperator, VerifyGetReturn } from "./HookDefine.js";
+import { SubscribeHelper } from "./Subscriber.js";
 
 type Constructor<T> = new (...args: any[]) => T;
 
@@ -289,4 +289,4 @@ HookUtil.get = HookUtilImp.get;
 HookUtil.create = HookUtilImp.create;
 HookUtil.destroy = HookUtilImp.destroy;
 
-export * from "./HookDefine";
+export * from "./HookDefine.js";

@@ -1,9 +1,9 @@
-import { assert } from "../global/GlobalFunctions";
-import { clearUtilLinkerWithSystemCtors } from "../misc/UtilLinker";
-import { Env } from "./Env";
-import { Constructor, EEnvType, getManager, IEnvData, StoreConstructor, SystemConstructor } from "./Interface";
-import { SingletonStore, Store } from "./Store";
-import { System } from "./System";
+import { assert } from "../global/GlobalFunctions.js";
+import { clearUtilLinkerWithSystemCtors } from "../misc/UtilLinker.js";
+import { Env } from "./Env.js";
+import { Constructor, EEnvType, getManager, IEnvData, StoreConstructor, SystemConstructor } from "./Interface.js";
+import { SingletonStore, Store } from "./Store.js";
+import { System } from "./System.js";
 
 /**
  * 关于 get 和 find 的区分

@@ -1,10 +1,10 @@
 import "reflect-metadata";
 
-import { assert } from "../global/GlobalFunctions";
-import { HookUtil } from "../misc/HookDefine";
-import { SubscribeHook } from "../misc/SubscribeHook";
-import { SingletonStore, Store } from "./Store";
-import { System } from "./System";
+import { assert } from "../global/GlobalFunctions.js";
+import { HookUtil } from "../misc/HookDefine.js";
+import { SubscribeHook } from "../misc/SubscribeHook.js";
+import { SingletonStore, Store } from "./Store.js";
+import { System } from "./System.js";
 
 /**
  * 订阅器目标

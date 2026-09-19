@@ -5,7 +5,7 @@ import { D, F } from "k-ts-framework";
 import { cc } from "k-ts-framework-cocos";
 import { findWnd, OnWidgetBoundSEvent, openWnd, RUIStore } from "k-ui-framework";
 
-import { bindChildren, findPrefabProxy, getPrefabProxy, registerCocosUI, registerCocosUITemplate } from "../src/index";
+import { bindChildren, findPrefabProxy, getPrefabProxy, registerCocosUI, registerCocosUITemplate } from "../src/index.js";
 
 function setupSceneWithCanvas() {
     let scene = new cc.Scene("TestScene");

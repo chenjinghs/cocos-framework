@@ -3,7 +3,7 @@
 
 import { F } from "k-ts-framework";
 
-import { RUIStore, UIResType, UITagType } from "./Define";
+import { RUIStore, UIResType, UITagType } from "./Define.js";
 
 export const ASYNC_CREATE_PREFAB = Symbol("AsyncCreatePrefab");
 export const createPrefabAsync = F.createUtilLinker<(owner: F.RStore, tag: UITagType, parent?: UIResType, params?: any, callback?: (uiStore: RUIStore) => void) => { cancel: () => void }>();
@@ -12,7 +12,7 @@ export const ASYNC_OPEN_WND = Symbol("AsyncOpenWnd");
 export const openWndAsync = F.createUtilLinker<(wndTag: UITagType, params?: any, overrideLayer?: number, callback?: () => void) => { cancel: () => void }>();
 
 // prettier-ignore
-declare module "k-ts-framework/dist/framework/System" {
+declare module "k-ts-framework/dist/framework/System.js" {
     export interface System {
         /**
          * 异步创建一个 Prefab

@@ -1,9 +1,9 @@
-import { D } from "../framework/Decorator";
-import { Env } from "../framework/Env";
-import { Constructor, getManager, IEnvData, IStartAsyncExtraOutput, SystemConstructor } from "../framework/Interface";
-import { assert, getStackTraceInfo } from "../global";
-import { cancelAsyncChainIfAllParentsDestroyed } from "./AsyncInfo";
-import { HookType, HookUtil } from "./HookDefine";
+import { D } from "../framework/Decorator.js";
+import { Env } from "../framework/Env.js";
+import { Constructor, getManager, IEnvData, IStartAsyncExtraOutput, SystemConstructor } from "../framework/Interface.js";
+import { assert, getStackTraceInfo } from "../global/index.js";
+import { cancelAsyncChainIfAllParentsDestroyed } from "./AsyncInfo.js";
+import { HookType, HookUtil } from "./HookDefine.js";
 
 type NonPromise<T> = T extends Promise<any> ? never : T;
 type IsPromise<T> = T extends Promise<any> ? true : false;
@@ -13,7 +13,7 @@ export type UtilFunctionType = (...args: any[]) => NonPromise<any>;
 export type AsyncUtilFunctionType = (asyncHandle: symbol, ...args: any[]) => Promise<any>;
 export type LinkFuncType<T> = IsPromiseFunc<T> extends true ? (asyncHandle: symbol, ...args: any[]) => Promise<any> : (...args: any[]) => NonPromise<any>;
 
-declare module "../framework/Decorator" {
+declare module "../framework/Decorator.js" {
     namespace D {
         export function linkUtil<TFunc extends (...args: any[]) => any>(
             func: TFunc,

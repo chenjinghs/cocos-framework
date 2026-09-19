@@ -1,10 +1,10 @@
-import { Action, StoreAction } from "../framework/Action";
-import { D } from "../framework/Decorator";
-import { Event, StoreEvent } from "../framework/Event";
-import { Constructor, EDataInheritType } from "../framework/Interface";
-import { assert } from "../global";
-import { HookType, HookUtil } from "./HookDefine";
-import { HookOperatorBase } from "./HookUtilImpl";
+import { Action, StoreAction } from "../framework/Action.js";
+import { D } from "../framework/Decorator.js";
+import { Event, StoreEvent } from "../framework/Event.js";
+import { Constructor, EDataInheritType } from "../framework/Interface.js";
+import { assert } from "../global/index.js";
+import { HookType, HookUtil } from "./HookDefine.js";
+import { HookOperatorBase } from "./HookUtilImpl.js";
 
 export type RouteTargetType = Action<unknown> & StoreAction<unknown> & Event & StoreEvent;
 export type RouteDecoratorFunc = <T extends RouteTargetType>(ctor: Constructor<T>, ...args: any[]) => boolean;

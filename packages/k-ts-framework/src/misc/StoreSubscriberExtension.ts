@@ -1,13 +1,13 @@
-import { getManager } from "../framework/Interface";
-import { RStore, Store } from "../framework/Store";
-import { System } from "../framework/System";
-import { assert } from "../global/GlobalFunctions";
-import { HookType, HookUtil } from "./HookDefine";
-import { HookOperatorBase } from "./HookUtilImpl";
-import { SubscribeHook } from "./SubscribeHook";
-import { checkArgsEqual, ISubscriber, SubscribeInstanceInfo } from "./Subscriber";
+import { getManager } from "../framework/Interface.js";
+import { RStore, Store } from "../framework/Store.js";
+import { System } from "../framework/System.js";
+import { assert } from "../global/GlobalFunctions.js";
+import { HookType, HookUtil } from "./HookDefine.js";
+import { HookOperatorBase } from "./HookUtilImpl.js";
+import { SubscribeHook } from "./SubscribeHook.js";
+import { checkArgsEqual, ISubscriber, SubscribeInstanceInfo } from "./Subscriber.js";
 
-declare module "../framework/System" {
+declare module "../framework/System.js" {
     export interface System {
         subscribeWithStoreLifecycle(store: Store | RStore, ...args: any[]): number;
         unsubscribeWithStoreLifecycle(store: Store | RStore, ...args: any[]): boolean;

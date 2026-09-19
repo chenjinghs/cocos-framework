@@ -1,7 +1,7 @@
 import { F } from "k-ts-framework";
 
-import { EWndState, IUITemplate, RUIStore, UIResType, UIRootStore, UIStore, UITagType } from "./Define";
-import { UIEngineInterface } from "./EngineInterface";
+import { EWndState, IUITemplate, RUIStore, UIResType, UIRootStore, UIStore, UITagType } from "./Define.js";
+import { UIEngineInterface } from "./EngineInterface.js";
 
 // -------------------------------------------------------------
 // Wnd

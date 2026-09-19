@@ -5,7 +5,7 @@
         "types": ["node"],
         "paths": {
             "k-ts-framework": ["./../k-ts-framework/src/index.ts"],
-            "k-ts-framework/dist/framework/System": ["./../k-ts-framework/src/framework/System.ts"],
+            "k-ts-framework/dist/framework/System.js": ["./../k-ts-framework/src/framework/System.ts"],
             "cc": ["./tests/_mocks/cc.ts"]
         }
     },

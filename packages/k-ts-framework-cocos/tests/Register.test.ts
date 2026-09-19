@@ -3,9 +3,9 @@ import { test } from "node:test";
 
 import { F } from "k-ts-framework";
 
-import { registerAsyncLoadSubscriber } from "../src/AsyncLoad";
-import { registerDelegateSubscriber } from "../src/DelegateEvent";
-import { registerKFrameworkCocos } from "../src/index";
+import { registerAsyncLoadSubscriber } from "../src/AsyncLoad.js";
+import { registerDelegateSubscriber } from "../src/DelegateEvent.js";
+import { registerKFrameworkCocos } from "../src/index.js";
 
 test("子注册器与总装配重复调用幂等，且装配结果完整可用", () => {
     // 消费项目可能先直接调子注册器、再由 KFrameworkBootstrap 调总装配：重复注册不得触发重复断言

@@ -1,14 +1,14 @@
 import { F } from "k-ts-framework";
-import { cc, registerKFrameworkCocos } from "k-ts-framework-cocos";
+import { cc, ccclass, registerKFrameworkCocos } from "k-ts-framework-cocos";
 
-import { attachUIRootToScene } from "./CocosUISystem";
-import { UI_SYSTEM_TAGS_FOR_COCOS } from "./Define";
+import { attachUIRootToScene } from "./CocosUISystem.js";
+import { UI_SYSTEM_TAGS_FOR_COCOS } from "./Define.js";
 
-export * from "./Define";
-export * from "./CocosUISystem";
-export * from "./WidgetSearcher";
-export * from "./PrefabProxyEx";
-export * from "./DecoratorExtension";
+export * from "./Define.js";
+export * from "./CocosUISystem.js";
+export * from "./WidgetSearcher.js";
+export * from "./PrefabProxyEx.js";
+export * from "./DecoratorExtension.js";
 
 let registered = false;
 
@@ -29,7 +29,7 @@ export function registerCocosUI(): void {
 /**
  * 场景接入组件：挂到场景任一节点，onLoad 时自动完成 registerCocosUI() 并创建 UIRoot 子树。
  */
-@cc.ccclass("CocosUISystem")
+@ccclass("CocosUISystem")
 export class CocosUISystemComponent extends cc.Component {
     public onLoad(): void {
         registerCocosUI();

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { newByteArray } from "../src/ByteArray";
+import { newByteArray } from "../src/ByteArray.js";
 
 test("newByteArray 全契约：Num/Add/Get/GetRef/Set/Contains/FindIndex/RemoveAt/IsValidIndex/Empty", () => {
     let arr = newByteArray();

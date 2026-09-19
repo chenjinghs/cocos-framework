@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/member-ordering */
-import { Env } from "../framework/Env";
-import { Constructor, IEnvData, IStartAsyncExtraOutput, IStartAsyncParams, ISubscribeHelper, ISystem, ResolveFuncType } from "../framework/Interface";
-import { assert, getStackTraceInfo, getStackTraceInfoString, IStackTraceInfo } from "../global/GlobalFunctions";
-import { AsyncInfo, cancelAllAsyncInfos, cancelAsyncInfo, createAsyncInfo, createPromiseInfo } from "./AsyncInfo";
+import { Env } from "../framework/Env.js";
+import { Constructor, IEnvData, IStartAsyncExtraOutput, IStartAsyncParams, ISubscribeHelper, ISystem, ResolveFuncType } from "../framework/Interface.js";
+import { assert, getStackTraceInfo, getStackTraceInfoString, IStackTraceInfo } from "../global/GlobalFunctions.js";
+import { AsyncInfo, cancelAllAsyncInfos, cancelAsyncInfo, createAsyncInfo, createPromiseInfo } from "./AsyncInfo.js";
 
 /**
  * 订阅实例的信息

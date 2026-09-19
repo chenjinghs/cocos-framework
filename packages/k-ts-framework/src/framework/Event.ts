@@ -1,6 +1,6 @@
-import { HookProcessor, HookType, HookUtil } from "../misc/HookDefine";
-import { Constructor } from "./Interface";
-import { Store } from "./Store";
+import { HookProcessor, HookType, HookUtil } from "../misc/HookDefine.js";
+import { Constructor } from "./Interface.js";
+import { Store } from "./Store.js";
 
 const SYMBOL_KEY_STORE = Symbol("KeyStore");
 let processor = new HookProcessor();

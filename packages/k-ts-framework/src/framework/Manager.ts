@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/member-ordering */
-import { assert, isChildOf } from "../global/GlobalFunctions";
-import { HookType, HookUtil } from "../misc/HookDefine";
-import { RuntimeContext } from "../misc/RuntimeContext";
-import { SubscribeHelper } from "../misc/Subscriber";
-import { TagHelper } from "../misc/TagHelper";
-import { Env } from "./Env";
-import { Constructor, EDataInheritType, IEnvData, IManager, IStore, ISubscribeHelper, ISystem, ISystemWrapper, NestedTag, RIStore, setManager, StoreConstructor, SystemConstructor } from "./Interface";
-import { RootStore, SingletonStore, StoreProxy } from "./Store";
+import { assert, isChildOf } from "../global/GlobalFunctions.js";
+import { HookType, HookUtil } from "../misc/HookDefine.js";
+import { RuntimeContext } from "../misc/RuntimeContext.js";
+import { SubscribeHelper } from "../misc/Subscriber.js";
+import { TagHelper } from "../misc/TagHelper.js";
+import { Env } from "./Env.js";
+import { Constructor, EDataInheritType, IEnvData, IManager, IStore, ISubscribeHelper, ISystem, ISystemWrapper, NestedTag, RIStore, setManager, StoreConstructor, SystemConstructor } from "./Interface.js";
+import { RootStore, SingletonStore, StoreProxy } from "./Store.js";
 
 /**
  * 存储所有store相关的信息

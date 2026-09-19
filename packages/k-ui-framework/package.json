@@ -9,6 +9,7 @@
     "author": "kingsoft",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
+    "type": "module",
     "dependencies": {
         "reflect-metadata": "0.1.13",
         "k-ts-framework": "*",

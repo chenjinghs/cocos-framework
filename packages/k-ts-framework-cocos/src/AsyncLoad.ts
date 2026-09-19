@@ -1,7 +1,7 @@
 import { F } from "k-ts-framework";
 
-import { cc } from "./cc";
-import { instantiatePrefab, loadAsset, loadScene } from "./ResourceUtil";
+import { cc } from "./cc.js";
+import { instantiatePrefab, loadAsset, loadScene } from "./ResourceUtil.js";
 
 // /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Async load
@@ -245,7 +245,7 @@ export function registerAsyncLoadSubscriber() {
     asyncLoadSubscriberRegistered = true;
 }
 
-declare module "k-ts-framework/dist/framework/System" {
+declare module "k-ts-framework/dist/framework/System.js" {
     export interface System {
         /**
          * 订阅异步加载

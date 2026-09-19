@@ -1,14 +1,14 @@
 
 
-import { Action, StoreAction } from "../framework/Action";
-import { Event, StoreEvent } from "../framework/Event";
-import { CallbackType } from "../framework/Interface";
-import { Store, StoreProxy } from "../framework/Store";
-import { System } from "../framework/System";
-import { stacktrace } from "../global/GlobalFunctions";
-import { HookOperatorBase, HookProcessor, HookType, HookUtil } from "./HookUtilImpl";
-import { SubscribeHook } from "./SubscribeHook";
-import { SubscribeInstanceInfo } from "./Subscriber";
+import { Action, StoreAction } from "../framework/Action.js";
+import { Event, StoreEvent } from "../framework/Event.js";
+import { CallbackType } from "../framework/Interface.js";
+import { Store, StoreProxy } from "../framework/Store.js";
+import { System } from "../framework/System.js";
+import { stacktrace } from "../global/GlobalFunctions.js";
+import { HookOperatorBase, HookProcessor, HookType, HookUtil } from "./HookUtilImpl.js";
+import { SubscribeHook } from "./SubscribeHook.js";
+import { SubscribeInstanceInfo } from "./Subscriber.js";
 
 export class RecordInfoNode {
     public info: string;

@@ -1,5 +1,5 @@
-export * from "./PublicAE";
-export * from "./Util";
-export * from "./Define";
+export * from "./PublicAE.js";
+export * from "./Util.js";
+export * from "./Define.js";
 
-import "./UIStateSystem";
+import "./UIStateSystem.js";

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/method-signature-style */
-import { IEnvData } from "../framework/Interface";
+import { IEnvData } from "../framework/Interface.js";
 
 export enum HookType {
     onStoreRegister = 0,

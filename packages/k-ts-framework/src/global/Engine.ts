@@ -1,4 +1,4 @@
-import { createUtilLinker } from "../misc/UtilLinker";
+import { createUtilLinker } from "../misc/UtilLinker.js";
 
 /**
  * 为了给其他插件扩展engine接口用

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/member-ordering */
-import { assert } from "../global/GlobalFunctions";
-import { Constructor, EDataInheritType, EEnvType, getManager, IEnv, IEnvData } from "./Interface";
+import { assert } from "../global/GlobalFunctions.js";
+import { Constructor, EDataInheritType, EEnvType, getManager, IEnv, IEnvData } from "./Interface.js";
 
 const TEMP_ENV_NAME = "__temp";
 

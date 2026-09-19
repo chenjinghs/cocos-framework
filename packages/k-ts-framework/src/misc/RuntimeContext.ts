@@ -1,6 +1,6 @@
-import { Env } from "../framework/Env";
-import { EDataInheritType, IEnvData, IStore } from "../framework/Interface";
-import { assert } from "../global/GlobalFunctions";
+import { Env } from "../framework/Env.js";
+import { EDataInheritType, IEnvData, IStore } from "../framework/Interface.js";
+import { assert } from "../global/GlobalFunctions.js";
 
 /*
  * 记录运行时的一些信息，包括堆栈检查，action记录什么的

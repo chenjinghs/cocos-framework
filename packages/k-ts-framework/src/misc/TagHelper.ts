@@ -1,4 +1,4 @@
-import { assert } from "../global/GlobalFunctions";
+import { assert } from "../global/GlobalFunctions.js";
 
 type Constructor = new (...args: any[]) => any;
 

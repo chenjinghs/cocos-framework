@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/member-ordering */
-import { assert } from "../global/GlobalFunctions";
-import { HookType, HookUtil } from "../misc/HookDefine";
-import { RuntimeContext } from "../misc/RuntimeContext";
-import { getManager, IStartAsyncParams, ISystem, NestedTag, StoreConstructor, SystemConstructor } from "./Interface";
-import { Store } from "./Store";
+import { assert } from "../global/GlobalFunctions.js";
+import { HookType, HookUtil } from "../misc/HookDefine.js";
+import { RuntimeContext } from "../misc/RuntimeContext.js";
+import { getManager, IStartAsyncParams, ISystem, NestedTag, StoreConstructor, SystemConstructor } from "./Interface.js";
+import { Store } from "./Store.js";
 
 export type AsyncParametersWithoutHandle<T> = T extends (asyncHandle: symbol, ...args: infer P) => any ? P : never;
 

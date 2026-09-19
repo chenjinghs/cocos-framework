@@ -1,12 +1,17 @@
-import { safeStringify } from "json-util";
+// json-util 是 CJS 包（vendor tgz）。Creator 3.8 打包器把 CJS 编译为"仅 default 导出
+// （= module.exports 整体）"的 SystemJS 模块，具名导入/命名空间导入均拿不到成员；
+// 必须 default 导入后运行时解构。真 ESM 环境（4.0/Node）下 default 同样是 exports 对象。
+import jsonUtil from "json-util";
 import { D, F } from "k-ts-framework";
 
-import { EWndState, RUIStore, UI_SYSTEM_TAG, UIResType, UIRootStore, UIStore, UITagType, WndDataStore } from "./Define";
-import { UIEngineInterface } from "./EngineInterface";
-import * as AE from "./PublicAE";
-import { createPrefabAsync, openWndAsync } from "./SubscriberExtension";
-import { UILogger } from "./UILogger";
-import * as Util from "./Util";
+const { safeStringify } = jsonUtil as typeof import("json-util");
+
+import { EWndState, RUIStore, UI_SYSTEM_TAG, UIResType, UIRootStore, UIStore, UITagType, WndDataStore } from "./Define.js";
+import { UIEngineInterface } from "./EngineInterface.js";
+import * as AE from "./PublicAE.js";
+import { createPrefabAsync, openWndAsync } from "./SubscriberExtension.js";
+import { UILogger } from "./UILogger.js";
+import * as Util from "./Util.js";
 
 const MAX_SUB_ORDER = 99;
 const LOAD_WND_RES_PENDING_TASK_HANDLE = Symbol("LoadWndRes");
@@ -34,7 +39,15 @@ class UISystem extends F.System {
 
     @D.linkUtil(openWndAsync)
     protected openWndAsync(uiTag: UITagType, params?: unknown, overrideLayer?: number, callback?: () => void): { cancel: () => void } {
-        let shell: { handle: symbol | undefined; cancel: () => void } = { handle: undefined, cancel: () => shell.handle && this.cancelAsync(shell.handle) && this.closeWnd(uiTag) };
+        let shell: { handle: symbol | undefined; cancel: () => void } = {
+            handle: undefined,
+            cancel: () => {
+                if (shell.handle) {
+                    this.cancelAsync(shell.handle);
+                    this.closeWnd(uiTag);
+                }
+            },
+        };
         this.startAsync(async (handle: symbol) => {
             shell.handle = handle;
             this.openWnd(uiTag, params, overrideLayer);

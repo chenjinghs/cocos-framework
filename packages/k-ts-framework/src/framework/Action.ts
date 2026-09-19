@@ -1,7 +1,7 @@
-import { assert } from "../global/GlobalFunctions";
-import { HookProcessor, HookType, HookUtil } from "../misc/HookDefine";
-import { Constructor } from "./Interface";
-import { Store } from "./Store";
+import { assert } from "../global/GlobalFunctions.js";
+import { HookProcessor, HookType, HookUtil } from "../misc/HookDefine.js";
+import { Constructor } from "./Interface.js";
+import { Store } from "./Store.js";
 
 export type InferActionReturnType<T> = T extends {
     doImp: (check: boolean) => infer P;

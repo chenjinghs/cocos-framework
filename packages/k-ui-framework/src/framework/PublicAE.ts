@@ -1,6 +1,6 @@
 import { F } from "k-ts-framework";
 
-import { UITagType } from "./Define";
+import { UITagType } from "./Define.js";
 
 /**
  * UI 控件/界面被隐藏事件

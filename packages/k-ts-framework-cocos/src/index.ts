@@ -1,20 +1,20 @@
 import { F } from "k-ts-framework";
 
-import { cc } from "./cc";
-import { newByteArray } from "./ByteArray";
-import { registerAsyncLoadSubscriber } from "./AsyncLoad";
-import { registerDelegateSubscriber } from "./DelegateEvent";
-import { registerEngineSystem } from "./EngineLinker";
+import { cc, ccclass } from "./cc.js";
+import { newByteArray } from "./ByteArray.js";
+import { registerAsyncLoadSubscriber } from "./AsyncLoad.js";
+import { registerDelegateSubscriber } from "./DelegateEvent.js";
+import { registerEngineSystem } from "./EngineLinker.js";
 
-export * from "./cc";
-export * from "./ResourceUtil";
-export * from "./NodeUtil";
-export * from "./PrefabProxy";
-export * from "./EventWrapper";
-export * from "./DelegateEvent";
-export * from "./ByteArray";
-export * from "./AsyncLoad";
-export * from "./EngineLinker";
+export * from "./cc.js";
+export * from "./ResourceUtil.js";
+export * from "./NodeUtil.js";
+export * from "./PrefabProxy.js";
+export * from "./EventWrapper.js";
+export * from "./DelegateEvent.js";
+export * from "./ByteArray.js";
+export * from "./AsyncLoad.js";
+export * from "./EngineLinker.js";
 
 let registered = false;
 
@@ -39,7 +39,7 @@ export function registerKFrameworkCocos(): void {
 /**
  * 场景接入组件：挂到场景任一节点，onLoad 时自动完成 registerKFrameworkCocos()。
  */
-@cc.ccclass("KFrameworkBootstrap")
+@ccclass("KFrameworkBootstrap")
 export class KFrameworkBootstrap extends cc.Component {
     public onLoad(): void {
         registerKFrameworkCocos();
