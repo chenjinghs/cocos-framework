@@ -33,7 +33,8 @@ export function registerEngineSystem(): void {
         registered = true;
         // k-ts-framework 里的 F.Engine.readTextFile 是延迟占位包装，这里取真正的 linker 再装饰注册 cc 实现
         const readTextFileLinker = F.Engine.getReadTextFileLinker();
-
+        // 类表达式上的方法装饰器在 tsx(esbuild)下会按 TC39 stage-3 签名发射,
+        // D.linkUtil 已做双签名兼容(见 UtilLinker.ts),装饰器写法两条链路均可
         @D.system(COCOS_ENGINE_SYSTEM_TAG)
         class CocosEngineSystem extends F.System {
             @D.linkUtil(readTextFileLinker)

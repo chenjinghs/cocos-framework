@@ -20,6 +20,34 @@ interface IPrefabBindInfo {
 }
 
 /**
+ * 兼容 legacy(prototype, key[, descriptor]) 与 TC39 stage-3(value, context) 两种装饰器参数形态:
+ * 生产链路(tsc/webpack)发 legacy;tsx/esbuild 转换链路对方法/字段装饰器可能发 stage-3。
+ * stage-3 拿不到持有类,延迟到首个实例构造时注册(addInitializer 的 this 即实例);
+ * 注册语义与 legacy 装饰期注册一致——prefab 绑定必然晚于 store/system 实例化。
+ */
+function decorateMember(
+    target: unknown,
+    propertyKeyOrContext: unknown,
+    descriptor: PropertyDescriptor | undefined,
+    register: (ctor: Function, name: string, method: unknown) => void,
+): void {
+    let ctx = propertyKeyOrContext as { name?: unknown; addInitializer?: (init: (this: unknown) => void) => void };
+    if (propertyKeyOrContext !== null && typeof propertyKeyOrContext === "object" && (typeof ctx.name === "string" || typeof ctx.name === "symbol")) {
+        let name = String(ctx.name);
+        let method = target;
+        let registered = false;
+        ctx.addInitializer?.(function (this: unknown) {
+            if (registered) return;
+            registered = true;
+            register((this as { constructor: Function }).constructor, name, method);
+        });
+    } else {
+        let holder = target as { constructor: Function };
+        register(holder.constructor, String(propertyKeyOrContext as string | symbol), descriptor?.value);
+    }
+}
+
+/**
  * Cocos UI 装饰器运行时：把 @onPrefabEvent 声明的事件与 @bind/@bindChildren 声明的 prefab
  * 在 prefab 绑定时应用到 store 上，解绑时清理。语义对齐 Unity 版 DecoratorExtension。
  */
@@ -152,10 +180,12 @@ class UICocosDecoratorSystem extends F.System {
  * 面板绑定后自动把 cc 事件桥接到该方法，签名 (store, ...eventArgs)。
  */
 export function onPrefabEvent(objectName: string, eventName: string): MethodDecorator {
-    return (target, _propertyKey, descriptor) => {
-        // reason: MethodDecorator 的 descriptor.value 在标准库中即 any，这里收窄为事件回调签名
-        let callback = descriptor.value as (...args: unknown[]) => void;
-        F.HookUtil.get(UICocosDecoratorOperator, true)?.registerPrefabEvent(target.constructor, objectName, eventName, callback);
+    return (target, propertyKey, descriptor) => {
+        decorateMember(target, propertyKey, descriptor, (ctor, _name, method) => {
+            // reason: 装饰器边界的方法值标准库即 any,收窄为事件回调签名
+            let callback = method as (...args: unknown[]) => void | undefined;
+            F.HookUtil.get(UICocosDecoratorOperator, true)?.registerPrefabEvent(ctor, objectName, eventName, callback);
+        });
     };
 }
 
@@ -167,7 +197,9 @@ export function onPrefabEvent(objectName: string, eventName: string): MethodDeco
  */
 export function bind(objectName: string, prefabTag: string, params?: unknown): PropertyDecorator {
     return (target, propertyKey) => {
-        F.HookUtil.get(UICocosDecoratorOperator, true)?.registerPrefabBind(target.constructor, objectName, prefabTag, String(propertyKey), params);
+        decorateMember(target, propertyKey, undefined, (ctor, name) => {
+            F.HookUtil.get(UICocosDecoratorOperator, true)?.registerPrefabBind(ctor, objectName, prefabTag, name, params);
+        });
     };
 }
 
@@ -179,6 +211,8 @@ export function bind(objectName: string, prefabTag: string, params?: unknown): P
  */
 export function bindChildren(objectName: string, prefabTag: string, params?: unknown | unknown[]): PropertyDecorator {
     return (target, propertyKey) => {
-        F.HookUtil.get(UICocosDecoratorOperator, true)?.registerPrefabBind(target.constructor, objectName, prefabTag, String(propertyKey), params, true);
+        decorateMember(target, propertyKey, undefined, (ctor, name) => {
+            F.HookUtil.get(UICocosDecoratorOperator, true)?.registerPrefabBind(ctor, objectName, prefabTag, name, params, true);
+        });
     };
 }

@@ -91,22 +91,47 @@ function createUtilLinkerImpl(asyncOptions?: IAsyncUtilLinkerOptions) {
 }
 
 (D as any).linkUtil = function <T extends UtilFunctionType | AsyncUtilFunctionType>(utilLinkerFunction: T) {
-    return function (target: any, property: string) {
+    return function (target: any, property: any): any {
         let linker = Env.getCurrentData(UtilLinkerRegistry).funcToLinker.get(utilLinkerFunction);
         assert(linker, `link util failed, can not find source util function`);
         assert(!linker.func, `link util failed, the target function has been linked`);
 
-        let ctor = target.constructor;
-        let func = Object.getOwnPropertyDescriptor(target, property)?.value;
-        assert(typeof func === "function", `link util failed, ${property} in ${ctor.name} is not a valid function`);
+        // 兼容两种方法装饰器签名:
+        // legacy (prototype, "name")(tsc/webpack 生产链路);
+        // TC39 stage-3 (methodFn, {kind:"method", name, addInitializer})(tsx/esbuild 转换链路,
+        // 类表达式上的方法装饰器必为 stage-3,部分链路对声明 likewise)。两种都注册到同一 linker。
+        let isStage3 = typeof property === "object" && property !== null && typeof property.kind === "string";
+        let name: string;
+        let func: unknown;
+        let boundCtor: Constructor<any> | undefined;
+
+        if (isStage3) {
+            let context = property as { name: string; addInitializer?: (initializer: (this: any) => void) => void };
+            name = context.name;
+            func = target;
+            context.addInitializer?.(function (this: any) {
+                boundCtor ??= this.constructor;
+                linker.ctor = boundCtor;
+            });
+        } else {
+            name = property;
+            func = Object.getOwnPropertyDescriptor(target, property)?.value;
+            boundCtor = target.constructor;
+            linker.ctor = boundCtor;
+        }
+        assert(typeof func === "function", `link util failed, ${name} is not a valid function`);
 
         let asyncOptions = linker.asyncOptions;
+        let getCtor = (): Constructor<any> => {
+            assert(boundCtor, `link util failed, ${name}: system ctor has not been resolved (no instance created yet)`);
+            return boundCtor;
+        };
 
-        linker.ctor = ctor;
         linker.func = (...args: any[]): any => {
             let parentAsyncHandle: symbol | undefined;
+            let ctor = getCtor();
             if (asyncOptions) {
-                const funcName = `async util function ${ctor.name}.${property} `;
+                const funcName = `async util function ${ctor.name}.${name} `;
                 assert(args.length > 0 && typeof args[0] === "symbol", funcName + `must have asyncHandle as first argument`);
                 parentAsyncHandle = args[0];
                 assert(typeof parentAsyncHandle === "symbol", funcName + `must have asyncHandle as first argument`);
@@ -116,9 +141,9 @@ function createUtilLinkerImpl(asyncOptions?: IAsyncUtilLinkerOptions) {
             }
 
             let system = getManager().findSystem(ctor);
-            assert(system, `system ${ctor.name} can not be accessed, function: ${property}`);
+            assert(system, `system ${ctor.name} can not be accessed, function: ${name}`);
 
-            HookUtil.triggerHook(HookType.onUtilLinkerPreCall, system, property, ...args);
+            HookUtil.triggerHook(HookType.onUtilLinkerPreCall, system, name, ...args);
             let ret;
 
             if (asyncOptions) {
@@ -140,7 +165,7 @@ function createUtilLinkerImpl(asyncOptions?: IAsyncUtilLinkerOptions) {
                 ret = func.call(system, ...args);
             }
 
-            HookUtil.triggerHook(HookType.onUtilLinkerPostCall, system, property, ret, ...args);
+            HookUtil.triggerHook(HookType.onUtilLinkerPostCall, system, name, ret, ...args);
             return ret;
         };
     };
