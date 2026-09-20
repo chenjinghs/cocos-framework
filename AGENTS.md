@@ -24,6 +24,7 @@ yarn build            # 构建运行时 4 包 dist(tsc -b,project references 连
 
 # 测试(node:test + tsx,无单独框架)
 yarn --cwd packages/k-export-flow test           # 82 个测试
+yarn --cwd packages/k-ts-framework test          # Event/Action 分发、System/Store 生命周期
 yarn --cwd packages/k-ts-framework-cocos test    # ByteArray/PrefabProxy/readTextFile
 yarn --cwd packages/k-ui-framework-cocos test    # sortingOrder → siblingIndex
 yarn --cwd packages/patcher-cocos test           # IPath 纯 JS 实现

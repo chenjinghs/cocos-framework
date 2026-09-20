@@ -77,7 +77,7 @@ yarn lint                                      # oxlint 全仓检查
 yarn format:check                              # oxfmt 格式检查
 
 # 测试（node 内置 test runner，经 tsx）
-yarn --cwd packages/k-export-flow test         # 82 个测试
+yarn --cwd packages/k-ts-framework test         # Event/Action 分发、System/Store 生命周期
 yarn --cwd packages/k-ts-framework-cocos test  # ByteArray/PrefabProxy/readTextFile
 yarn --cwd packages/k-ui-framework-cocos test  # sortingOrder → siblingIndex 重排
 yarn --cwd packages/patcher-cocos test         # IPath 纯 JS 实现
