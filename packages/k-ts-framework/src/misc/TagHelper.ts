@@ -139,7 +139,7 @@ export class TagHelper {
         }
 
         if (Array.isArray(added)) {
-            ret.concat(added);
+            ret.push(...added);
         } else {
             ret.push(added);
         }
@@ -211,5 +211,14 @@ export class TagHelper {
             ret = ret.concat(info.instances);
         }
         return ret;
+    }
+
+    /**
+     * 清空所有tag下的实例记录（销毁流程已单独处理实例本身，这里只清索引）
+     */
+    public resetAllInstances() {
+        for (let [_, info] of this._infos) {
+            info.reset();
+        }
     }
 }

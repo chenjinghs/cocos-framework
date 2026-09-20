@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import { D, F } from "../src/index.js";
+import { getManager } from "../src/framework/Interface.js";
 
 class ProbeEvent extends F.Event {}
 
@@ -106,4 +107,15 @@ test("destroyAll 按创建顺序反向销毁:先全部 preUninit 再 uninit", ()
         "B:uninit",
         "A:uninit",
     ]);
+});
+
+test("destroyAll 之后可重建:实例索引已清理,生命周期重新触发", () => {
+    trace.length = 0;
+    F.System.createByTag("SysA");
+    assert.deepEqual(trace, ["A:init", "A:postInit"], "destroyAll 后 createByTag 应重新走生命周期");
+    assert.ok(getManager().findSystem(SysA), "重建后应能查到 system 实例");
+    assert.ok(
+        !getManager().findSystemsByTag("SysA").some((v) => v === undefined),
+        "findSystemsByTag 不应残留已销毁的占位实例",
+    );
 });

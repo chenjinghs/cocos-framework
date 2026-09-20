@@ -267,14 +267,14 @@ export class Env implements IEnv {
         let oldEnv = this.current;
         this.current = env;
 
+        // 不吞异常：原实现catch后只打日志，scope仍返回true，会把真实故障
+        // （含模块初始化顺序错误）降级成一行console，并在catch自身对非Error
+        // 抛出物崩溃时漏掉env还原。改为finally还原 + 异常向上抛出。
         try {
             func();
-        } catch (error: any) {
-            if (error.message.includes("stack:")) console.error(error.message);
-            else console.error(`${error.message}\n${error.stack}`);
+        } finally {
+            this.current = oldEnv;
         }
-
-        this.current = oldEnv;
     }
 
     /**
@@ -307,16 +307,14 @@ export class Env implements IEnv {
 
         if (scope.targetEnvs.length === 1) {
             assert(scope.tempEnv === scope.targetEnvs[0]);
-            this.current = scope.savedEnv;
-        } else {
-            if (scope.targetEnvs.length === 0) {
-                // 没有找到目标env，直接什么都不做，相当于丢弃tempEnv
-            } else {
-                for (let targetEnv of scope.targetEnvs) {
-                    targetEnv.inheritFrom(scope.tempEnv, EDataInheritType.All);
-                }
+        } else if (scope.targetEnvs.length > 0) {
+            for (let targetEnv of scope.targetEnvs) {
+                targetEnv.inheritFrom(scope.tempEnv, EDataInheritType.All);
             }
         }
+        // targetEnvs为空时相当于丢弃tempEnv，不做继承。
+        // current的还原对三条分支都必须执行，否则多env分支会把current留在tempEnv上
+        this.current = scope.savedEnv;
     }
 
     /**

@@ -596,6 +596,11 @@ class Manager implements IManager {
                 this.onDestroySystem(data, s);
             }
         }
+
+        // destroySystemByTag 会对单个tag做reset，destroyAll同样要清掉实例索引，
+        // 否则残留的SystemInstanceInfo（system已为undefined）会让后续createByTag
+        // 误判为"已初始化"而拒绝重建，findSystemsByTag也会返回undefined
+        data.tagHelper.resetAllInstances();
     }
 
     // public findFriendSystem(ctor: SystemConstructor, friendCtor: SystemConstructor): ISystem | undefined {
