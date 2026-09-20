@@ -124,18 +124,19 @@ export class Rect {
 export class Asset {
     public name = "";
     public nativeUrl = "";
-    public ref = 0;
+    public uuid = "";
+    public refCount = 0;
     private destroyed = false;
     public destroy(): boolean {
         this.destroyed = true;
         return true;
     }
     public addRef(): Asset {
-        this.ref++;
+        this.refCount++;
         return this;
     }
     public decRef(): Asset {
-        this.ref--;
+        this.refCount--;
         return this;
     }
     public get isDestroyed(): boolean {
@@ -438,8 +439,11 @@ export class Bundle extends Asset {
         let onComplete = args.find((v): v is (err: Error | null, asset: Asset | null) => void => typeof v === "function");
         let asset = this.assets.get(path);
         queueMicrotask(() => {
-            if (asset) onComplete?.(null, asset);
-            else onComplete?.(new Error(`asset not found: ${path}`), null);
+            if (asset) {
+                asset.uuid = path; // 引擎按 uuid 缓存,mock 用路径作 uuid
+                assetManager.assets.set(asset.uuid, asset);
+                onComplete?.(null, asset);
+            } else onComplete?.(new Error(`asset not found: ${path}`), null);
         });
     }
 
@@ -476,8 +480,17 @@ class AssetManager {
     public removeBundle(bundle: Bundle): void {
         this.bundles.delete(bundle.name);
     }
-    public releaseAsset(_asset: Asset): void {}
-    public releaseAll(): void {}
+    public releaseAsset(asset: Asset): void {
+        // 引擎实测语义(3.8.8):释放 = 从缓存逐出,不动 refCount,不 destroy
+        this.assets.delete(asset.uuid);
+    }
+    public releaseAll(): void {
+        this.assets.clear();
+    }
+
+    /** 全局资产缓存(模拟引擎 assetManager.assets,按 uuid 索引) */
+    public readonly assets = new Map<string, Asset>();
+
 
     /** 测试辅助：注册 bundle */
     public addBundleForTest(bundle: Bundle): void {

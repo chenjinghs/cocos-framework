@@ -43,6 +43,14 @@ export async function loadAsset<T extends cc.Asset>(bundleName: string, path: st
     return promise;
 }
 
+/**
+ * 释放已加载资源：从 assetManager 缓存逐出（引擎语义：refCount 不减，
+ * 存活实例持有的引用不受影响；释放后同路径重新 load 会得到重新加载的资产）。
+ */
+export function releaseAsset(asset: cc.Asset): void {
+    cc.assetManager.releaseAsset(asset);
+}
+
 /** 加载场景，err 时 reject */
 export function loadScene(sceneName: string): Promise<void> {
     const { promise, resolve, reject } = deferred<void>();
