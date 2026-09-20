@@ -39,13 +39,40 @@ declare module "../framework/Decorator.js" {
 
 // /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Action & Event
+
+// 元数据缺失是工具链级别的事实（整条链路要么都有要么都没有），告警一次即可，不逐点刷屏
+let metadataMissingWarned = false;
+
+/** 兼容 legacy(prototype, key) 与 stage-3(method, context) 两种签名，仅用于告警文案定位 */
+function resolveMemberName(target: unknown, propertyKeyOrContext: unknown): string {
+    let ctx = propertyKeyOrContext as { name?: unknown } | null;
+    if (ctx !== null && typeof ctx === "object" && (typeof ctx.name === "string" || typeof ctx.name === "symbol")) {
+        // stage-3 下 target 是方法本身，拿不到持有类
+        return String(ctx.name);
+    }
+    let holder = target as { constructor?: Function } | null;
+    return `${holder?.constructor?.name ?? "<unknown>"}.${String(propertyKeyOrContext as string | symbol)}`;
+}
+
 function actionEventOn(target: any, _propertyKey: string | symbol, descriptor: PropertyDescriptor, ...args: any[]) {
     if (args.length > 1) return false;
 
     // esbuild/tsx 等转换器不发射 emitDecoratorMetadata，此时无法判定事件类型；
-    // 吞掉装饰器保证模块可加载（真实构建由 tsc/webpack 发射 metadata，订阅行为不变）
+    // 吞掉装饰器保证模块可加载（真实构建由 tsc/webpack 发射 metadata，订阅行为不变）。
+    // 但"吞掉"= 该订阅静默失效，必须告警，否则测试里看到的是一个永不触发的订阅。
     let paramTypes = Reflect.getMetadata("design:paramtypes", target, _propertyKey) as Array<any> | undefined;
-    if (paramTypes === undefined) return true;
+    if (paramTypes === undefined) {
+        if (!metadataMissingWarned) {
+            metadataMissingWarned = true;
+            console.warn(
+                `[k-ts-framework] @D.on 订阅未生效：当前工具链未发射 emitDecoratorMetadata（tsx/esbuild 等），` +
+                    `无法从参数类型推断 Action/Event，本次运行中所有 @D.on 声明都会被跳过` +
+                    `（首个：${resolveMemberName(target, _propertyKey)}）。` +
+                    `tsc/Creator 生产构建会发射 metadata，行为不受影响；单测中请改用 this.subscribe(...)。`,
+            );
+        }
+        return true;
+    }
     if (paramTypes.length !== 1) return false;
 
     let storeCtor = args[0];
