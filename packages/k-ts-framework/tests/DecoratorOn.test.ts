@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import { D, F } from "../src/index.js";
+import { getManager } from "../src/framework/Interface.js";
 
 class PingEvent extends F.Event {}
 
@@ -22,7 +23,8 @@ test("@D.on:元数据缺失时发出告警,不静默吞掉订阅", () => {
             @D.on()
             protected onPing(_event: PingEvent): void {}
         }
-        void OnWarnProbe;
+        // 装饰器返回 undefined = 保留原方法，类定义本身不应被破坏
+        assert.equal(OnWarnProbe.name, "OnWarnProbe");
     } finally {
         console.warn = originalWarn;
     }
@@ -44,9 +46,9 @@ test("this.subscribe 是该链路下的可用替代,订阅正常送达", () => {
             });
         }
     }
-    void OnFallbackProbeSystem;
 
     F.System.createByTag("OnFallbackProbe");
+    assert.ok(getManager().findSystem(OnFallbackProbeSystem), "system 应已创建");
     PingEvent.dispatch();
     assert.equal(hit, true);
 });
