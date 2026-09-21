@@ -2,6 +2,9 @@
     "extends": "../../tsconfig.base.json",
     "compilerOptions": {
         "composite": false,
+        // 源码相对导入无扩展名(包历史早于 node16 约定);bundler 解析免改源码,产物由 esbuild 打包
+        "module": "ESNext",
+        "moduleResolution": "Bundler",
         "paths": {
             "k-ts-framework": ["./../k-ts-framework/src/index.ts"]
         }

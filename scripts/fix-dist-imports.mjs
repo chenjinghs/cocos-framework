@@ -6,7 +6,7 @@
 // 依赖 setter 不执行、模块顶层拿到的绑定是 undefined（如 F.Store extends 崩溃）。
 // 预览目标（浏览器）把包合并为单 chunk 所以不受影响。
 //
-// 做法：把运行时 4 包 dist 里的跨包裸导入改写为**相对路径**（文件级依赖，所有
+// 做法：把运行时 5 包 dist 里的跨包裸导入改写为**相对路径**（文件级依赖，所有
 // 目标/环境都能解析：编辑器打包器、预览合并、真 ESM 的 Node/4.0）。
 // 在 tsc -b 之后运行：node scripts/fix-dist-imports.mjs
 import { readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
@@ -18,6 +18,7 @@ const PACKAGES = [
     { name: "k-ts-framework-cocos", entry: "dist/index.js" },
     { name: "k-ui-framework", entry: "dist/index.js" },
     { name: "k-ui-framework-cocos", entry: "dist/index.js" },
+    { name: "game-data-collection", entry: "dist/index.js" },
 ];
 
 function* walk(dir) {

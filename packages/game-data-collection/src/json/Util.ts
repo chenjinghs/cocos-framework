@@ -102,6 +102,10 @@ export function parseJson(path: string) {
     // return obj;
 }
 
+export function parseJsonText(text: string): unknown {
+    return jsonUtil.parse(text);
+}
+
 // ////////////////////////////////////////////////////////////////////////////////////////
 export interface IJsonDataTableLib {
     convertWithKey: (rawData: any, keyType: EDataTableKeyType) => any;

@@ -1,6 +1,7 @@
 {
     "name": "game-data-collection",
     "version": "0.2.2",
+    "type": "module",
     "description": "",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",

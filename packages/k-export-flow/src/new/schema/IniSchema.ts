@@ -71,6 +71,7 @@ export class IniSchema extends Schema {
                 if (!valueField) continue;
 
                 assert(valueField.config.alias !== undefined, `alias is undefined in ini config, name: ${valueField.config.name}`);
+                serializer.setData(value);
                 ret[valueField.config.alias] = valueField.serializeValue(serializer, value, this.serializeContext);
             }
 

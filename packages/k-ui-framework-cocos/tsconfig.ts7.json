@@ -16,6 +16,9 @@
         },
         {
             "path": "../k-ts-framework-cocos/tsconfig.ts7.json"
+        },
+        {
+            "path": "../game-data-collection/tsconfig.ts7.json"
         }
     ]
 }

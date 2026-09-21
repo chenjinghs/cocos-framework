@@ -32,6 +32,21 @@ export interface IConfig extends IProcessorConfig {
     exportIterateFunc?: boolean;
     exportTemplateCountToTS?: boolean;
     outputLog?: boolean;
+    importPathMap?: Record<string, string>;
+}
+
+/**
+ * 重写生成 TS 代码里的 import 说明符。
+ * importPathMap 缺省时原样返回,保证输出与未配置时逐字节一致。
+ */
+export function rewriteImportSpecifiers(lines: Array<string>, importPathMap?: Record<string, string>): Array<string> {
+    if (!importPathMap) return lines;
+    return lines.map((line) =>
+        line.replace(/from "([^"]+)"/g, (matched: string, specifier: string) => {
+            let mapped = importPathMap[specifier];
+            return mapped ? `from "${mapped}"` : matched;
+        }),
+    );
 }
 
 interface ISchemaConfig {
@@ -75,6 +90,7 @@ export class ExportInfoToTypeScript extends Processor<ExportInfoToTypeScript> {
         this.customFieldHelper = new CustomFieldTextExporterHelper(this);
         let out = new Array<string>();
         this.exportTS(data, name, jsonPath, out);
+        out = rewriteImportSpecifiers(out, config.importPathMap);
 
         // 处理extra data
         let extraData = data.getExtraData(TaggedInfoExtraData);

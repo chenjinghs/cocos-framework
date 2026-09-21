@@ -69,7 +69,7 @@ test("IniSchema serializes key-value rows and ignores comments, blanks, and unkn
         ["empty", ""],
     ], new StringReader());
 
-    assert.deepEqual(data, { maxLevel: 0, title: "" });
+    assert.deepEqual(data, { maxLevel: 42, title: "Alpha" });
     await assert.rejects(() => schema.generateRawData({ maxLevel: 42 }, new StringReader()), /ini-error|data must be an array/);
 });
 
