@@ -7,7 +7,14 @@ import { Processor } from "./Base";
 import type { IProcessorConfig } from "./Base";
 
 interface IConfig extends IProcessorConfig {
-    paths: string[];
+    /** 全量构建时重建(删掉重建)、增量构建时仅确保存在的目录。只能放中间产物目录 */
+    paths?: string[];
+    /**
+     * 永不重建、始终只确保存在的目录。
+     * 资源目录(Cocos assets 下带受版本管理 .meta 的目录)必须走这里:重建会连带删掉 .meta,
+     * 编辑器重新导入会生成新 uuid,已有引用全断。这类目录的陈旧产物由 PathOperation Mirror 清理。
+     */
+    ensurePaths?: string[];
 }
 
 class PrepareDir extends Processor<PrepareDir> {
@@ -15,7 +22,7 @@ class PrepareDir extends Processor<PrepareDir> {
     public outputDataType = LastProcessorOutputData;
 
     protected async onPreProcessAll(inputs: Array<AnyType>) {
-        const { paths } = this.getConfig<IConfig>();
+        const { paths, ensurePaths } = this.getConfig<IConfig>();
         const incrementBuild = Manager.getInstance().getAdditionalArg("incrementBuild") === "true";
 
         for (const dirPath of paths ?? []) {
@@ -29,7 +36,14 @@ class PrepareDir extends Processor<PrepareDir> {
             }
         }
 
-        ExportLogger.logVerbose(`PrepareDir: ${incrementBuild ? "ensured" : "recreated"} ${paths?.length ?? 0} dir(s)`);
+        for (const dirPath of ensurePaths ?? []) {
+            ExportLogger.logVerbose(`PrepareDir ensure(never recreate) ${dirPath}`);
+            await ensureDir(dirPath);
+        }
+
+        ExportLogger.logVerbose(
+            `PrepareDir: ${incrementBuild ? "ensured" : "recreated"} ${paths?.length ?? 0} dir(s), ensured ${ensurePaths?.length ?? 0} dir(s)`,
+        );
         return inputs;
     }
 

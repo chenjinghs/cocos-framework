@@ -154,11 +154,6 @@ export class ExportInfoToTypeScript extends Processor<ExportInfoToTypeScript> {
     }
 
     protected async exportIndex(allData: DataWithSchema[]) {
-        // 匹配历史两种自动行:`export * as X from "./F";`(Creator 3.8 预览 bundler 会静默丢弃该语法,
-        // 运行时为 undefined,已废弃)与 `import * as X from "./F";`(现行格式,配套行 `export { X };`)
-        const MATCH_REG = /^(?:export \* as|import \* as) (\w+) from "\.\/(.+)";/;
-        const PAIR_EXPORT_REG = /^export \{ \w+ \};$/;
-
         let config = this.getConfig<IConfig>();
         let targetDir = path.resolve(config.targetDir);
         let existingFiles = await this.collectExistingTypeScriptFiles(targetDir);
@@ -177,52 +172,53 @@ export class ExportInfoToTypeScript extends Processor<ExportInfoToTypeScript> {
 
         for (let [dir, files] of allFileDirs) {
             let indexFile = path.join(dir, "index.ts");
-            let appendFile = await pathExists(indexFile);
 
-            if (appendFile) {
-                let content = await loadTextFileData(indexFile);
-                let lines = content.split(/\r?\n/);
-                let kept = new Array<string>();
+            // 新建与更新走同一个生成器:手工行(新建时为自动生成头)去尾部空行 → 一个空行 → 自动行 → 收尾换行。
+            // 两个分支各写一份会产出不同字节,全量/增量来回切就制造无意义 diff。
+            let existingContent = (await pathExists(indexFile)) ? await loadTextFileData(indexFile) : undefined;
+            let manualLines = existingContent === undefined ? GENERATED_TS_FILE_HEADER.split(/\r?\n/) : this.stripGeneratedIndexLines(existingContent);
+            let newContent = this.buildIndexContent(manualLines, files);
+            if (newContent === existingContent) continue; // 无变化不写盘,保持增量幂等
 
-                // 丢弃全部自动行(含旧 export * as 格式的遗留行,下次导出即自愈为 import + export 格式),
-                // 保留手工添加的其他行
-                for (let i = 0; i < lines.length; ++i) {
-                    let line = lines[i];
-                    if (MATCH_REG.test(line)) {
-                        // 现行格式有配套 export 行,一并丢弃;旧格式无配套行
-                        if (line.includes("import * as") && i + 1 < lines.length && PAIR_EXPORT_REG.test(lines[i + 1])) ++i;
-                        continue;
-                    }
-                    kept.push(line);
-                }
-
-                // 统一尾部空行后按序追加全部自动行
-                while (kept.length > 0 && kept[kept.length - 1].trim() === "") kept.pop();
-                for (let file of files) {
-                    let name = this.validateExportName(file);
-                    kept.push(`import * as ${name} from "./${file}";`);
-                    kept.push(`export { ${name} };`);
-                }
-
-                let newContent = kept.join(EOF);
-                if (newContent === content) continue; // 无变化不写盘,保持增量幂等
-                this.recordFileChange(indexFile, newContent);
-                await writeFile(indexFile, newContent);
-            } else {
-                let lines = new Array<string>();
-                lines.push(GENERATED_TS_FILE_HEADER);
-                lines.push(``);
-                for (let file of files) {
-                    let name = this.validateExportName(file);
-                    lines.push(`import * as ${name} from "./${file}";`);
-                    lines.push(`export { ${name} };`);
-                }
-
-                let content = lines.join(EOF);
-                this.recordFileChange(indexFile, content);
-                await writeFile(indexFile, content);
-            }
+            this.recordFileChange(indexFile, newContent);
+            await writeFile(indexFile, newContent);
         }
+    }
+
+    /** 丢弃索引文件里的全部自动行,保留手工添加的其他行 */
+    protected stripGeneratedIndexLines(content: string) {
+        // 匹配历史两种自动行:`export * as X from "./F";`(Creator 3.8 预览 bundler 会静默丢弃该语法,
+        // 运行时为 undefined,已废弃)与 `import * as X from "./F";`(现行格式,配套行 `export { X };`)
+        const MATCH_REG = /^(?:export \* as|import \* as) (\w+) from "\.\/(.+)";/;
+        const PAIR_EXPORT_REG = /^export \{ \w+ \};$/;
+
+        let lines = content.split(/\r?\n/);
+        let kept = new Array<string>();
+        for (let i = 0; i < lines.length; ++i) {
+            let line = lines[i];
+            if (MATCH_REG.test(line)) {
+                // 现行格式有配套 export 行,一并丢弃;旧格式无配套行
+                if (line.includes("import * as") && i + 1 < lines.length && PAIR_EXPORT_REG.test(lines[i + 1])) ++i;
+                continue;
+            }
+            kept.push(line);
+        }
+        return kept;
+    }
+
+    /** 索引文件唯一的字节形态:手工行 + 一个空行 + 按序自动行 + 收尾换行 */
+    protected buildIndexContent(manualLines: Array<string>, files: Array<string>) {
+        let lines = manualLines.slice();
+        while (lines.length > 0 && lines[lines.length - 1].trim() === "") lines.pop();
+        lines.push(``);
+
+        for (let file of files) {
+            let name = this.validateExportName(file);
+            lines.push(`import * as ${name} from "./${file}";`);
+            lines.push(`export { ${name} };`);
+        }
+
+        return lines.join(EOF) + EOF;
     }
 
     private async collectExistingTypeScriptFiles(dir: string) {

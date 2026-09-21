@@ -2,7 +2,7 @@ import * as merge from "merge";
 import * as path from "path";
 
 import { FilePathData } from "../data";
-import { assertWithLoc, deepCopy, getFileBaseName, getFileExtension, pathExists } from "../misc";
+import { assertWithLoc, deepCopy, ExportLogger, formatLoc, getFileBaseName, getFileExtension, pathExists } from "../misc";
 import { Loader } from "../misc/Loader";
 import { EXTENSION_TO_SCHEMA_TYPE, Schema } from "../schema/Base";
 import { Processor } from "./Base";
@@ -13,10 +13,19 @@ import type { ISchemaConfig } from "../schema/Base";
 import type { IProcessorConfig } from "./Base";
 import type { IAdditionalDataProcessConfig } from "./PostProcess";
 
+/** 收集到的源文件找不到 schema 时的处置方式 */
+export type MissingSchemaPolicy = "ignore" | "warn" | "error";
+
 interface IConfig extends IProcessorConfig {
     extensions: Array<string>;
     targetMapping: ITargetMappingConfig;
     schemaAliasFile?: string;
+    /**
+     * 源文件在 targetMapping 下匹配不到任何 schema 时怎么办,缺省 "warn"。
+     * 面向策划的导出工具里静默跳过是最坏选项:表加了、schema 忘了,只会在运行时
+     * getTemplate 断言才暴露。项目管线应显式配 "error"。
+     */
+    onMissingSchema?: MissingSchemaPolicy;
 }
 
 interface ISchemaAliasInfo {
@@ -99,7 +108,10 @@ class GenerateSchema extends Processor<GenerateSchema> {
 
         let aliasInfo = this.schemaAliasInfoMap.get(getFileBaseName(source.path));
         let schemaFiles = await this.getSchemaFiles(source.path, targetMapping, aliasInfo);
-        if (!schemaFiles) return;
+        if (!schemaFiles || schemaFiles.length === 0) {
+            this.handleMissingSchema(source.path);
+            return;
+        }
 
         let promises = new Array<Promise<any>>();
         for (const schemaFile of schemaFiles) {
@@ -108,7 +120,11 @@ class GenerateSchema extends Processor<GenerateSchema> {
             if (loader) promises.push(loader.loadRawDataObject(schemaFile, this.config));
         }
 
-        if (promises.length === 0) return;
+        // 匹配到了文件但没有一个后缀有对应 loader,等价于"没有 schema"
+        if (promises.length === 0) {
+            this.handleMissingSchema(source.path);
+            return;
+        }
 
         let configs = await Promise.all(promises);
         let finalConfig = merge.recursive(true, ...configs) as ISchemaConfigWithAlias;
@@ -130,6 +146,17 @@ class GenerateSchema extends Processor<GenerateSchema> {
 
         await newSchema.generateFields();
         return newSchema;
+    }
+
+    /** 源文件匹配不到 schema:按 onMissingSchema 策略忽略/告警/报错,报错时带上源文件与 schema 目录 */
+    private handleMissingSchema(sourcePath: string) {
+        let config = this.getConfig<IConfig>();
+        let policy = config.onMissingSchema ?? "warn";
+        if (policy === "ignore") return;
+
+        let schemaDir = String(config.targetMapping?.targetDir ?? "");
+        if (policy === "error") assertWithLoc(false, "schema-file-not-found", { source: sourcePath, schemaDir: schemaDir });
+        ExportLogger.logKey(formatLoc("schema-file-not-found", { source: sourcePath, schemaDir: schemaDir }));
     }
 
     // eslint-disable-next-line @typescript-eslint/member-ordering

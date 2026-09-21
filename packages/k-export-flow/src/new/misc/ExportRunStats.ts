@@ -38,9 +38,10 @@ const JSON_OUTPUT_PREFIX = "TempSaved/export-flow/output/client/config/";
 const LUA_OUTPUT_PREFIX = "LuaScripts/DataCenter/NewConfig/";
 const TS_DATA_TABLE_OUTPUT_PREFIX = "TypeScripts/packages/client/src/generated/data-table/";
 const TS_INI_OUTPUT_PREFIX = "TypeScripts/packages/client/src/generated/ini/";
+// 导出中间产物:落在 TempSaved/export-flow/ 下且不匹配任何业务产物前缀的路径。
+// 中间目录每轮重建,记进 summary 只会把真正的业务产物变更淹没在噪声里。
 const INTERMEDIATE_DIRECTORIES = [
-    "TempSaved/export-flow/csv/",
-    "TempSaved/export-flow/raw-data-cache/",
+    "TempSaved/export-flow/",
 ];
 const INTERMEDIATE_FILES = new Set([
     "export-csv-increment-info.json",
@@ -87,14 +88,19 @@ export function normalizeExportPath(filePath: string, rootPath?: string) {
 
 export function classifyExportOutputPath(filePath: string, rootPath?: string): IExportOutputClassification | undefined {
     let normalizedPath = normalizeExportPath(filePath, rootPath);
-    if (!normalizedPath || isIntermediateExportPath(normalizedPath)) return undefined;
+    if (!normalizedPath) return undefined;
 
-    let type: ExportOutputFileType;
+    // 已知业务产物前缀优先于中间产物判定:JSON 产物目录就在 TempSaved/export-flow/ 之下
+    let type: ExportOutputFileType | undefined;
     if (normalizedPath.startsWith(JSON_OUTPUT_PREFIX) && normalizedPath.endsWith(".json")) type = ExportOutputFileType.Json;
     else if (normalizedPath.startsWith(LUA_OUTPUT_PREFIX) && normalizedPath.endsWith(".lua")) type = ExportOutputFileType.Lua;
     else if (normalizedPath.startsWith(TS_DATA_TABLE_OUTPUT_PREFIX) && normalizedPath.endsWith(".ts")) type = ExportOutputFileType.TypeScriptDataTable;
     else if (normalizedPath.startsWith(TS_INI_OUTPUT_PREFIX) && normalizedPath.endsWith(".ts")) type = ExportOutputFileType.TypeScriptIni;
-    else type = ExportOutputFileType.OtherBusinessOutput;
+
+    if (type === undefined) {
+        if (isIntermediateExportPath(normalizedPath)) return undefined;
+        type = ExportOutputFileType.OtherBusinessOutput;
+    }
 
     return {
         type: type,
@@ -167,8 +173,11 @@ export class ExportRunStats {
         return ret.sort((a, b) => a.path.localeCompare(b.path));
     }
 
-    public renderSummary() {
-        const changes = this.getChanges();
+    /**
+     * 渲染产物变更摘要:verbose 下逐条列出,否则只给分类计数。
+     * changes 可传入已过滤的列表(ExportSummary 处理器的 ignorePatterns 走这条)。
+     */
+    public renderSummary(changes: Array<IExportOutputChangeInfo> = this.getChanges()) {
         const outputLines = ["=== Export Summary ==="];
 
         if (changes.length === 0) {
@@ -177,14 +186,30 @@ export class ExportRunStats {
             return;
         }
 
-        const TAG: Record<ExportOutputChangeType, string> = {
-            [ExportOutputChangeType.Added]: "[A]",
-            [ExportOutputChangeType.Modified]: "[M]",
-            [ExportOutputChangeType.Deleted]: "[D]",
-        };
+        if (ExportLogger.isVerbose()) {
+            const TAG: Record<ExportOutputChangeType, string> = {
+                [ExportOutputChangeType.Added]: "[A]",
+                [ExportOutputChangeType.Modified]: "[M]",
+                [ExportOutputChangeType.Deleted]: "[D]",
+            };
+            for (const change of changes) outputLines.push(`${TAG[change.changeType]} ${change.path}`);
+        } else {
+            const counts: Record<ExportOutputChangeType, number> = {
+                [ExportOutputChangeType.Added]: 0,
+                [ExportOutputChangeType.Modified]: 0,
+                [ExportOutputChangeType.Deleted]: 0,
+            };
+            for (const change of changes) counts[change.changeType]++;
 
-        for (const change of changes) {
-            outputLines.push(`${TAG[change.changeType]} ${change.path}`);
+            const parts = new Array<string>();
+            for (const [changeType, tag] of [
+                [ExportOutputChangeType.Added, "Added"],
+                [ExportOutputChangeType.Modified, "Modified"],
+                [ExportOutputChangeType.Deleted, "Deleted"],
+            ] as Array<[ExportOutputChangeType, string]>) {
+                if (counts[changeType] > 0) parts.push(`${tag}: ${counts[changeType]}`);
+            }
+            outputLines.push(parts.join("  "));
         }
 
         ExportLogger.logKey(outputLines.join("\n"));

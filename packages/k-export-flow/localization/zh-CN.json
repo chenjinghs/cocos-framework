@@ -13,6 +13,7 @@
     "invalid-file-mapping-type": "无法创建TargetMapping [{type}]",
     "read-file-failed": "读取文件失败, 文件路径: [{file}], 错误: [{error}]",
     "create-schema-failed": "创建 Schema 错误, 源文件: [{source}], Schema 文件: [{schemaFile}]",
+    "schema-file-not-found": "源文件找不到对应的 schema 文件, 源文件: [{source}], schema 目录: [{schemaDir}]",
     "create-field-failed": "创建 Field 失败, 名称: [{name}], 类型: [{type}]",
     "invalid-container-field": "创建 Field 失败, 非法容器类型 [{type}]",
     "field-description": "Field 名称 [{name}], 类型: [{type}]",

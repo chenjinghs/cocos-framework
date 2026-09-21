@@ -13,6 +13,7 @@
     "invalid-file-mapping-type": "invalid file mapping type [{type}]",
     "read-file-failed": "read file failed, file: [{file}], error: [{error}]",
     "create-schema-failed": "create schema failed, source file: [{source}], schema file: [{schemaFile}]",
+    "schema-file-not-found": "no schema file found for source file [{source}], schema dir: [{schemaDir}]",
     "create-field-failed": "create field failed, name: [{name}], type: [{type}]",
     "invalid-container-field": "create field failed, invalid container field [{type}]",
     "field-description": "field name [{name}], type: [{type}]",

@@ -18,6 +18,7 @@ async function collectSubdirs(dir: string): Promise<string[]> {
 
 import { AnyType, LastProcessorOutputData } from "../data";
 import { ExportLogger } from "../misc/ExportLogger";
+import { Manager } from "../manager/Manager";
 import { ExportRunStats } from "../misc/ExportRunStats";
 import { assertWithLoc } from "../misc/Localization";
 import { copyDir, copyFile, ensureDir, ensureFile, getErrorInfo, mkDir, pathExists, rmPath, walkParallelPromise, writeFile } from "../misc/Util";
@@ -29,6 +30,7 @@ enum OperationType {
     Recreate = "Recreate",
     Ensure = "Ensure",
     Copy = "Copy",
+    Mirror = "Mirror",
     DeleteAllExceptInDir = "DeleteAllExceptInDir",
     OverrideConfigWithEnv = "OverrideConfigWithEnv",
 }
@@ -46,6 +48,16 @@ interface ICopyOperation extends IOperation {
     from: string;
     to: string;
     isFile?: boolean;
+}
+
+interface IMirrorOperation extends IOperation {
+    from: string;
+    to: string;
+    /**
+     * 边车文件后缀,缺省 [".meta"]。`x.ts.meta` 只要 `x.ts` 还在 from 里就保留;
+     * `x.ts` 被清掉时它的边车一起清掉。Cocos 的 .meta 存着 uuid,不能误删。
+     */
+    sidecarExtensions?: string[];
 }
 
 interface IDeleteAllExceptInDirOperation extends IOperation {
@@ -90,6 +102,9 @@ class PathOperation extends Processor<PathOperation> {
                     case OperationType.Copy:
                         await this.copyPath(op.from, op.to, op.isFile);
                         break;
+                    case OperationType.Mirror:
+                        await this.mirrorPath(op.from, op.to, op.sidecarExtensions);
+                        break;
                     case OperationType.DeleteAllExceptInDir:
                         await this.deleteAllExceptInDir(op.dir, op.except ?? op.excepts);
                         break;
@@ -101,7 +116,7 @@ class PathOperation extends Processor<PathOperation> {
                 }
                 operationCountMap.set(op.type, (operationCountMap.get(op.type) ?? 0) + 1);
             } catch (error: any) {
-                assertWithLoc(false, "path-operation-failed", { path: op.path, error: getErrorInfo(error) });
+                assertWithLoc(false, "path-operation-failed", { path: op.path ?? `${op.from} -> ${op.to}`, error: getErrorInfo(error) });
             }
         }
         if (operationCountMap.size > 0) {
@@ -176,6 +191,61 @@ class PathOperation extends Processor<PathOperation> {
         } else {
             await this.recordCopiedDirChange(from, to);
             await copyDir(from, to);
+        }
+    }
+
+    /**
+     * 把 from 目录同步到 to 目录:内容不同才写(不制造无意义的 mtime 变化),
+     * 全量构建下再清理 to 里 from 已经没有的产物(及其边车文件)。
+     *
+     * 目标目录里"没有生产者"的文件即陈旧产物:源表被删/改名后,单纯 Copy 是只增不减的,
+     * 旧产物会继续被打进包。
+     *
+     * 清理只在全量构建做:增量构建里增量闸门(CollectChangedSchema)会把没变的表全滤掉,
+     * from 只剩本轮变更表的产物——是产物全集的子集,拿它当依据清理会删掉所有没变的表。
+     */
+    protected async mirrorPath(from: string, to: string, sidecarExtensions?: string[]) {
+        const incrementBuild = Manager.getInstance().getAdditionalArg("incrementBuild") === "true";
+        ExportLogger.logVerbose(`mirror ${from} to ${to}, cleanStale: ${!incrementBuild}`);
+        if (!(await pathExists(from))) {
+            ExportLogger.logKey(`PathOperation Mirror: source dir does not exist, skip: ${from}`);
+            return;
+        }
+
+        let sidecars = sidecarExtensions ?? [".meta"];
+        let sourceFiles = await walkParallelPromise(from);
+        let sourceRelativePaths = new Set<string>();
+
+        await ensureDir(to);
+        for (let file of sourceFiles) {
+            if (!fs.statSync(file).isFile()) continue;
+
+            let relativePath = path.relative(from, file).replaceAll("\\", "/");
+            sourceRelativePaths.add(relativePath);
+
+            let targetPath = path.join(to, relativePath);
+            if (fs.existsSync(targetPath) && fs.readFileSync(file).equals(fs.readFileSync(targetPath))) continue;
+
+            this.recordCopiedFileChange(file, targetPath);
+            await copyFile(file, targetPath);
+        }
+
+        if (incrementBuild) return;
+
+        let targetFiles = await walkParallelPromise(to);
+        for (let file of targetFiles) {
+            if (!fs.statSync(file).isFile()) continue;
+
+            let relativePath = path.relative(to, file).replaceAll("\\", "/");
+            if (sourceRelativePaths.has(relativePath)) continue;
+
+            // 边车文件跟随主文件:主文件还在就保留(.meta 里的 uuid 不能丢)
+            let sidecar = sidecars.find((ext) => relativePath.endsWith(ext));
+            if (sidecar && sourceRelativePaths.has(relativePath.slice(0, -sidecar.length))) continue;
+
+            ExportLogger.logVerbose(`mirror remove stale output: ${file}`);
+            this.recordDeleted(file);
+            await rmPath(file);
         }
     }
 
