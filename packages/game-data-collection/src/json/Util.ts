@@ -1,4 +1,7 @@
-import * as jsonUtil from "json-util";
+// 互操作:必须 default import。同步进 Creator 的 vendor 由 esbuild 将 CJS 打成 ESM、仅导出
+// default(require_index() 的 exports 对象);default import 在 tsx/Node 下同样解析为 exports 对象。
+// 命名空间 import 在 Creator vendor 下拿到 {default} 而无 parse——预览期已踩(jsonUtil.parse is not a function)。
+import jsonUtil from "json-util";
 import { F } from "k-ts-framework";
 
 import { DataTableTemplateInfo, EDataTableKeyType, IDataTableTemplate } from "../data-table";
