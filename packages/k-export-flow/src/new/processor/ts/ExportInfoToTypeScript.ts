@@ -154,7 +154,10 @@ export class ExportInfoToTypeScript extends Processor<ExportInfoToTypeScript> {
     }
 
     protected async exportIndex(allData: DataWithSchema[]) {
-        const MATCH_REG = /export \* as \w+ from "\.\/(.+)"/;
+        // 匹配历史两种自动行:`export * as X from "./F";`(Creator 3.8 预览 bundler 会静默丢弃该语法,
+        // 运行时为 undefined,已废弃)与 `import * as X from "./F";`(现行格式,配套行 `export { X };`)
+        const MATCH_REG = /^(?:export \* as|import \* as) (\w+) from "\.\/(.+)";/;
+        const PAIR_EXPORT_REG = /^export \{ \w+ \};$/;
 
         let config = this.getConfig<IConfig>();
         let targetDir = path.resolve(config.targetDir);
@@ -179,36 +182,40 @@ export class ExportInfoToTypeScript extends Processor<ExportInfoToTypeScript> {
             if (appendFile) {
                 let content = await loadTextFileData(indexFile);
                 let lines = content.split(/\r?\n/);
-                let matchResult;
-                let fileSet = new Set<string>(files);
-                let file;
+                let kept = new Array<string>();
 
-                // eslint-disable-next-line @typescript-eslint/prefer-for-of
+                // 丢弃全部自动行(含旧 export * as 格式的遗留行,下次导出即自愈为 import + export 格式),
+                // 保留手工添加的其他行
                 for (let i = 0; i < lines.length; ++i) {
-                    matchResult = lines[i].match(MATCH_REG);
-                    if (matchResult === null) continue;
-
-                    file = matchResult[1];
-                    if (fileSet.has(file)) fileSet.delete(file);
-                }
-
-                if (fileSet.size > 0) {
-                    let arr = Array.from(fileSet);
-                    arr.sort((a: string, b: string) => a.localeCompare(b));
-                    for (let f of arr) {
-                        lines.push(`export * as ${this.validateExportName(f)} from "./${f}";`);
+                    let line = lines[i];
+                    if (MATCH_REG.test(line)) {
+                        // 现行格式有配套 export 行,一并丢弃;旧格式无配套行
+                        if (line.includes("import * as") && i + 1 < lines.length && PAIR_EXPORT_REG.test(lines[i + 1])) ++i;
+                        continue;
                     }
-
-                    let content = lines.join(EOF);
-                    this.recordFileChange(indexFile, content);
-                    await writeFile(indexFile, content);
+                    kept.push(line);
                 }
+
+                // 统一尾部空行后按序追加全部自动行
+                while (kept.length > 0 && kept[kept.length - 1].trim() === "") kept.pop();
+                for (let file of files) {
+                    let name = this.validateExportName(file);
+                    kept.push(`import * as ${name} from "./${file}";`);
+                    kept.push(`export { ${name} };`);
+                }
+
+                let newContent = kept.join(EOF);
+                if (newContent === content) continue; // 无变化不写盘,保持增量幂等
+                this.recordFileChange(indexFile, newContent);
+                await writeFile(indexFile, newContent);
             } else {
                 let lines = new Array<string>();
                 lines.push(GENERATED_TS_FILE_HEADER);
                 lines.push(``);
                 for (let file of files) {
-                    lines.push(`export * as ${this.validateExportName(file)} from "./${file}";`);
+                    let name = this.validateExportName(file);
+                    lines.push(`import * as ${name} from "./${file}";`);
+                    lines.push(`export { ${name} };`);
                 }
 
                 let content = lines.join(EOF);

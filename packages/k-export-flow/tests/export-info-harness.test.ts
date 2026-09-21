@@ -121,8 +121,10 @@ test("ExportInfoToTypeScript harness covers interface generation, tagged info, a
     assert.match(exported, /@deprecated/);
 
     const index = fs.readFileSync(path.join(tsDir, "index.ts"), "utf-8");
-    assert.match(index, /export \* as Existing from "\.\/Existing";/);
-    assert.match(index, /export \* as CodexInfoHarness from "\.\/CodexInfoHarness";/);
+    // 旧 `export * as` 行(Creator 3.8 预览 bundler 会静默丢弃)被自愈为 import + export 格式
+    assert.doesNotMatch(index, /export \* as/);
+    assert.match(index, /import \* as CodexInfoHarness from "\.\/CodexInfoHarness";/);
+    assert.match(index, /export \{ CodexInfoHarness \};/);
 
     fs.rmSync(root, { recursive: true, force: true });
 });
@@ -163,8 +165,11 @@ test("ExportInfoToTypeScript repairs index entries for existing generated files"
     await processor.onPostProcessAll([]);
 
     const index = fs.readFileSync(path.join(tsDir, "index.ts"), "utf-8");
-    assert.match(index, /export \* as Existing from "\.\/Existing";/);
-    assert.match(index, /export \* as CachedButMissingFromIndex from "\.\/CachedButMissingFromIndex";/);
+    assert.doesNotMatch(index, /export \* as/);
+    assert.match(index, /import \* as Existing from "\.\/Existing";/);
+    assert.match(index, /export \{ Existing \};/);
+    assert.match(index, /import \* as CachedButMissingFromIndex from "\.\/CachedButMissingFromIndex";/);
+    assert.match(index, /export \{ CachedButMissingFromIndex \};/);
 
     fs.rmSync(root, { recursive: true, force: true });
 });

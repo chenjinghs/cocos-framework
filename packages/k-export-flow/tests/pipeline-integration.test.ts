@@ -228,11 +228,15 @@ test("minimal project pipeline exports json, TypeScript, environment-filtered cs
     assert.match(ts, /export const TEMPLATE_COUNT = 1/);
     assert.match(ts, /export function findTemplateWithCallback/);
     assert.match(ts, /@deprecated/);
-    assert.match(fs.readFileSync(indexFile, "utf-8"), /export \* as Hero from "\.\/Hero";/);
+    const indexContent = fs.readFileSync(indexFile, "utf-8");
+    assert.match(indexContent, /import \* as Hero from "\.\/Hero";/);
+    assert.match(indexContent, /export \{ Hero \};/);
     assert.match(fs.readFileSync(iniJsonFile, "utf-8"), /maxLevel/);
     assert.match(fs.readFileSync(iniTsFile, "utf-8"), /generateJsonIniWrapper/);
     assert.match(fs.readFileSync(iniTsFile, "utf-8"), /export function getTemplate/);
-    assert.match(fs.readFileSync(iniIndexFile, "utf-8"), /export \* as SettingsIni from "\.\/SettingsIni";/);
+    const iniIndexContent = fs.readFileSync(iniIndexFile, "utf-8");
+    assert.match(iniIndexContent, /import \* as SettingsIni from "\.\/SettingsIni";/);
+    assert.match(iniIndexContent, /export \{ SettingsIni \};/);
 
     await Manager.destroy();
     fs.rmSync(root, { recursive: true, force: true });

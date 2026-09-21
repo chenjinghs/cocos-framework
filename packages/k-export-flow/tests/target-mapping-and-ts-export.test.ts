@@ -280,9 +280,14 @@ test("TypeScript export covers custom, array, version fallback, custom body, ind
     assert.equal(fs.existsSync(path.join(tsDir, "CodexSkip.ts")), false);
 
     const index = fs.readFileSync(path.join(tsDir, "index.ts"), "utf-8");
-    assert.match(index, /export \* as CodexVersioned from "\.\/CodexVersioned";/);
-    assert.match(index, /export \* as Codex_Tilde from "\.\/Codex~Tilde";/);
-    assert.match(index, /export \* as CodexArray from "\.\/CodexArray";/);
+    // 现行格式为 import * as + export {}——Creator 3.8 预览 bundler 会静默丢弃 `export * as` 再导出
+    assert.doesNotMatch(index, /export \* as/);
+    assert.match(index, /import \* as CodexVersioned from "\.\/CodexVersioned";/);
+    assert.match(index, /export \{ CodexVersioned \};/);
+    assert.match(index, /import \* as Codex_Tilde from "\.\/Codex~Tilde";/);
+    assert.match(index, /export \{ Codex_Tilde \};/);
+    assert.match(index, /import \* as CodexArray from "\.\/CodexArray";/);
+    assert.match(index, /export \{ CodexArray \};/);
 
     await Manager.destroy();
     fs.rmSync(root, { recursive: true, force: true });
