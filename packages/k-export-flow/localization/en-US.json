@@ -73,6 +73,7 @@
     "ini-key-can-not-be-empty": "ini key can not be empty",
     "duplicated-value-in-data-table-ini": "duplicated value in data table ini",
     "duplicate-schema-name": "duplicated schema name [{name}], source: [{path1}] and [{path2}]",
+    "duplicate-output-path": "duplicated output path [{path}], source files [{source1}] and [{source2}] share the same base name; outputs are a flat namespace, rename one of the tables",
     "find-with-base-name-file-mapping-duplicate-base-name": "mapping file failed, file [{path1}] and [{path2}] have duplicated name: [{name}]",
     "rm-path-failed": "delete path failed, path: [{path}], error: {error}",
     "mk-dir-failed": "create directory failed, path: [{path}], error: {error}",

@@ -54,14 +54,62 @@ function writeTable(root: string, name: string): void {
     ].join("\n"));
 }
 
-/** 产物目录经 Mirror 落地的完整管线:中间产物在 temp 下重建,资源目录只 ensure */
-function buildPipeline(root: string, options?: { onMissingSchema?: string; incrementGate?: boolean }): string {
-    const csvDir = path.join(root, "csv");
+/** 产物目录经 Mirror 落地的完整管线:中间产物在 temp 下重建,资源目录只 ensure。
+ *  hierarchicalSchema 时源目录带层级,schema 用 FindWithRelativePath 按相对路径命中,产物仍按基名平铺 */
+function buildPipeline(root: string, options?: { onMissingSchema?: string; incrementGate?: boolean; hierarchicalSchema?: boolean }): string {
+    const csvDir = options?.hierarchicalSchema ? path.join(root, "design") : path.join(root, "csv");
     const schemaDir = path.join(root, "schema");
     const tempJsonDir = path.join(root, "temp", "json");
     const tempTsDir = path.join(root, "temp", "ts");
     const assetJsonDir = path.join(root, "assets", "config");
     const assetTsDir = path.join(root, "assets", "ts");
+
+    const schemaMapping = options?.hierarchicalSchema
+        ? [
+              "    targetMapping:",
+              "      type: FindWithRelativePath",
+              `      baseDir: "${normalize(csvDir)}"`,
+              `      targetDir: "${normalize(schemaDir)}"`,
+              "      extension: .yml",
+          ]
+        : [
+              "    targetMapping:",
+              "      type: FindWithBaseName",
+              `      targetDir: "${normalize(schemaDir)}"`,
+          ];
+    // 产物按基名平铺:层级只在 schema 侧,输出路径与 DATA_FILE 不变;
+    // 同名基名由 GenerateSchema 的 duplicate-schema-name 全局守卫兜底
+    const jsonMapping = options?.hierarchicalSchema
+        ? [
+              "    targetMapping:",
+              "      type: GenerateWithBaseName",
+              `      targetDir: "${normalize(tempJsonDir)}"`,
+              "      extension: .json",
+          ]
+        : [
+              "    targetMapping:",
+              "      type: GenerateWithBaseName",
+              `      baseDir: "${normalize(schemaDir)}"`,
+              `      targetDir: "${normalize(tempJsonDir)}"`,
+              "      extension: .json",
+          ];
+    const tsJsonMapping = options?.hierarchicalSchema
+        ? [
+              "    jsonTargetMapping:",
+              "      type: GenerateWithBaseName",
+              "      targetDir: config",
+              "      resolvePath: false",
+              "      extension: .json",
+          ]
+        : [
+              "    jsonTargetMapping:",
+              "      type: GenerateWithBaseName",
+              `      baseDir: "${normalize(schemaDir)}"`,
+              "      targetDir: config",
+              "      resolvePath: false",
+              "      checkInBaseDir: true",
+              "      extension: .json",
+          ];
 
     return [
         "processors:",
@@ -78,29 +126,17 @@ function buildPipeline(root: string, options?: { onMissingSchema?: string; incre
         "  - type: GenerateSchema",
         "    extensions: [.yml]",
         ...(options?.onMissingSchema ? [`    onMissingSchema: ${options.onMissingSchema}`] : []),
-        "    targetMapping:",
-        "      type: FindWithBaseName",
-        `      targetDir: "${normalize(schemaDir)}"`,
+        ...schemaMapping,
         ...(options?.incrementGate ? [
             "  - type: CollectChangedSchema",
             `    tempPath: "${normalize(path.join(root, "temp"))}"`,
         ] : []),
         "  - type: GenerateRawData",
         "  - type: SerializeToJson",
-        "    targetMapping:",
-        "      type: GenerateWithBaseName",
-        `      baseDir: "${normalize(schemaDir)}"`,
-        `      targetDir: "${normalize(tempJsonDir)}"`,
-        "      extension: .json",
+        ...jsonMapping,
         "  - type: ExportJsonDataTableToTypeScript",
         `    targetDir: "${normalize(tempTsDir)}"`,
-        "    jsonTargetMapping:",
-        "      type: GenerateWithBaseName",
-        `      baseDir: "${normalize(schemaDir)}"`,
-        "      targetDir: config",
-        "      resolvePath: false",
-        "      checkInBaseDir: true",
-        "      extension: .json",
+        ...tsJsonMapping,
         "  - type: PathOperation",
         "    operations:",
         "      - type: Mirror",
@@ -111,6 +147,65 @@ function buildPipeline(root: string, options?: { onMissingSchema?: string; incre
         `        to: "${normalize(assetTsDir)}"`,
     ].join("\n");
 }
+
+function writeNestedTable(root: string, subDir: string, name: string, schemaName?: string): void {
+    writeFile(path.join(root, "design", subDir, `${name}.csv`), "id,name\n1,Alpha\n");
+    writeFile(path.join(root, "schema", subDir, `${name}.yml`), [
+        "type: data-table",
+        `name: ${schemaName ?? name}`,
+        "key: id",
+        "fields:",
+        "  - name: id",
+        "    type: int",
+        "  - name: name",
+        "    type: string",
+    ].join("\n"));
+}
+
+test("FindWithRelativePath mirrors source hierarchy into schema dir while outputs stay flat", async () => {
+    const root = createTempDir("k-export-flow-relative-schema-");
+    const assetJsonDir = path.join(root, "assets", "config");
+    const assetTsDir = path.join(root, "assets", "ts");
+    writeNestedTable(root, "data-tables", "hero");
+    writeNestedTable(root, "shop", "item");
+
+    assert.equal(await runPipeline(root, buildPipeline(root, { hierarchicalSchema: true })), undefined);
+    // 产物按基名平铺,不带 schema 侧层级
+    assert.equal(fs.existsSync(path.join(assetJsonDir, "hero.json")), true);
+    assert.equal(fs.existsSync(path.join(assetJsonDir, "item.json")), true);
+    assert.equal(fs.existsSync(path.join(assetJsonDir, "data-tables")), false);
+    assert.match(fs.readFileSync(path.join(assetTsDir, "hero.ts"), "utf-8"), /DATA_FILE = "config\/hero\.json"/);
+
+    await Manager.destroy();
+    fs.rmSync(root, { recursive: true, force: true });
+});
+
+test("FindWithRelativePath reports the hierarchical source file when its schema is missing", async () => {
+    const root = createTempDir("k-export-flow-relative-missing-");
+    writeFile(path.join(root, "design", "data-tables", "orphan.csv"), "id,name\n1,Alpha\n");
+
+    const lastError = await runPipeline(root, buildPipeline(root, { hierarchicalSchema: true, onMissingSchema: "error" }));
+    assert.match(lastError ?? "", /orphan\.csv/);
+
+    await Manager.destroy();
+    fs.rmSync(root, { recursive: true, force: true });
+});
+
+test("SerializeToJson fails loudly when two same-basename tables collide on one flat output", async () => {
+    const root = createTempDir("k-export-flow-dup-output-");
+    // 文件基名相同、schema 名不同:绕开 duplicate-schema-name(守 schema 名),
+    // 专测产物路径守卫(守文件基名)
+    writeNestedTable(root, "data-tables", "item", "DTBattleItem");
+    writeNestedTable(root, "shop", "item", "DTShopItem");
+
+    const lastError = await runPipeline(root, buildPipeline(root, { hierarchicalSchema: true }));
+    assert.match(lastError ?? "", /item\.json/);
+    assert.match(lastError ?? "", /data-tables/);
+    assert.match(lastError ?? "", /shop/);
+
+    await Manager.destroy();
+    fs.rmSync(root, { recursive: true, force: true });
+});
 
 test("Mirror drops outputs whose source is gone and keeps .meta of surviving outputs", async () => {
     const root = createTempDir("k-export-flow-mirror-");

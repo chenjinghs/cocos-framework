@@ -72,6 +72,7 @@
     "ini-key-can-not-be-empty": "ini配置键值不能为空",
     "duplicated-value-in-data-table-ini": "ini配置表拥有重复值",
     "duplicate-schema-name": "重复的 schema 名称 [{name}], 文件: [{path1}] 和 [{path2}]",
+    "duplicate-output-path": "产物路径冲突 [{path}],源文件 [{source1}] 与 [{source2}] 基名相同;产物按基名平铺,请为其中一张表改名",
     "find-with-base-name-file-mapping-duplicate-base-name": "映射文件失败, 文件: [{path1}] 和 [{path2}] 拥有重复的名称: [{name}]",
     "rm-path-failed": "删除路径失败, 路径: [{path}], 错误信息: {error}",
     "mk-dir-failed": "创建目录失败, 路径: [{path}], 错误信息: {error}",

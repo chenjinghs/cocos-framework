@@ -17,6 +17,22 @@ class SerializeToJson extends Processor<SerializeToJson> {
     public inputDataType = DataWithSchema;
     public outputDataType = DataWithSchema;
 
+    protected async onPreProcessAll(inputs: Array<DataWithSchema>) {
+        // 产物命名空间守卫:duplicate-schema-name 守的是 schema 名,不是文件基名——
+        // 不同子目录下的同名表(schema 已按层命中)会映射到同一产物路径,后写覆盖先写。
+        // 这里先把全部 target 解析一遍,冲突当场报出两个源文件,而不是静默丢一张表。
+        let targetToSource = new Map<string, string>();
+        for (const data of inputs) {
+            let source = getSchemaTargetMappingSource(data.schema);
+            let target = await this.targetMapping!.getTarget(source);
+            if (!target) continue; // 目标解析失败由 processSingle 报自己的错
+
+            let found = targetToSource.get(target);
+            assertWithLoc(found === undefined, "duplicate-output-path", { path: target, source1: found ?? "", source2: source });
+            targetToSource.set(target, source);
+        }
+        return inputs;
+    }
     public async processSingle(data: DataWithSchema) {
         let config = this.getConfig<IConfig>();
         let outputObj = data.getData() as any;

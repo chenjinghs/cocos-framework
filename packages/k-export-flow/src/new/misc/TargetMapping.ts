@@ -2,7 +2,7 @@ import * as path from "path";
 
 import { assertWithLoc } from "./Localization";
 import { Registry } from "./Registry";
-import { assert, createRegExpFromString, getFileBaseName, getFileExtension, loadTextFileData, walkParallel } from "./Util";
+import { assert, createRegExpFromString, getFileBaseName, getFileExtension, loadTextFileData, pathExists, walkParallel } from "./Util";
 
 import type { Constructor } from "../data/Define";
 export interface ITargetMappingConfig {
@@ -110,6 +110,35 @@ class FindWithBaseName extends TargetMapping {
     }
 }
 FindWithBaseName.register();
+
+// ////////////////////////////////////////////////////////////////////////////////
+interface IFindWithRelativePathConfig extends ITargetMappingConfig {
+    /** 源文件的相对基准目录(如 design/) */
+    baseDir: string;
+    /** 目标根目录(如 schema/):target = targetDir/<source 相对 baseDir 的去后缀路径><extension> */
+    targetDir: string;
+    /** 目标后缀(如 .yml);缺省保留源后缀 */
+    extension?: string;
+}
+
+/**
+ * 按源文件的相对路径找目标文件:schema 目录镜像源目录层级时用——
+ * design/data-tables/battle/item.csv → schema/data-tables/battle/item.yml。
+ * 与 FindWithBaseName 的全局基名命名空间不同,不同子目录下的同名源文件各命中各的 schema。
+ * 目标文件不存在时返回 undefined,交由上层(GenerateSchema.onMissingSchema)按策略处置。
+ */
+class FindWithRelativePath extends TargetMapping {
+    public async getTarget(source: string) {
+        let config = this.getConfig<IFindWithRelativePathConfig>();
+        let relativePath = path.relative(config.baseDir, source);
+        if (relativePath.startsWith("..")) return undefined; // 不在 baseDir 下
+
+        let sourceExt = path.extname(relativePath);
+        let target = path.join(config.targetDir, relativePath.slice(0, relativePath.length - sourceExt.length) + (config.extension ?? sourceExt));
+        return (await pathExists(target)) ? target : undefined;
+    }
+}
+FindWithRelativePath.register();
 
 // ////////////////////////////////////////////////////////////////////////////////
 interface IGenerateWithBaseNameConfig extends ITargetMappingConfig {
