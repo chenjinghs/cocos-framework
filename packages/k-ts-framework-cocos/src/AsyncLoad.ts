@@ -9,13 +9,13 @@ export type LoadCallbackType = (obj: cc.Asset | cc.Node | undefined) => void;
 export type ICancelableRequest = { Cancel: () => void };
 
 namespace InnerLoadUtil {
-    // 下面这几个带New的口子必须传以 resources 为起点的相对路径，比如 "ui/Login/LoginMain.prefab"
+    // 下面这几个带New的口子默认传 resources 内相对路径（如 "ui/Login/LoginMain.prefab"）；loadAsyncAndInstantiate 可经 bundleName 指定其他 bundle
     // parent则是某个资源需要跟随哪个Node的生命周期而销毁，可不传
-    export function loadAsyncAndInstantiate(path: string, name: string, callback: LoadCallbackType, parent?: cc.Node): ICancelableRequest {
+    export function loadAsyncAndInstantiate(path: string, name: string, callback: LoadCallbackType, parent?: cc.Node, bundleName = "resources"): ICancelableRequest {
         F.assert(path !== undefined && path.trim() !== "", "path is empty");
 
         let cancelled = false;
-        loadAsset<cc.Prefab>("resources", path)
+        loadAsset<cc.Prefab>(bundleName, path)
             .then((prefab) => {
                 if (cancelled) return;
                 let node = instantiatePrefab(prefab);
@@ -24,7 +24,7 @@ namespace InnerLoadUtil {
                 callback(node);
             })
             .catch((err: unknown) => {
-                console.error(`loadAsyncAndInstantiate failed, path: ${path}`, err);
+                console.error(`loadAsyncAndInstantiate failed, bundle: ${bundleName}, path: ${path}`, err);
                 if (!cancelled) callback(undefined);
             });
 
@@ -82,7 +82,7 @@ namespace InnerLoadUtil {
 
 export interface IAsyncLoader {
     loadSceneAsync: (sceneName: string, callback: () => void) => ICancelableRequest;
-    loadAsyncAndInstantiate: (path: string, name: string, callback: LoadCallbackType, parent?: cc.Node) => ICancelableRequest;
+    loadAsyncAndInstantiate: (path: string, name: string, callback: LoadCallbackType, parent?: cc.Node, bundleName?: string) => ICancelableRequest;
     loadSpriteAsync: (spritePath: string, callback: LoadCallbackType, parent: cc.Node) => ICancelableRequest;
     loadAsync: (path: string, callback: LoadCallbackType, parent?: cc.Node) => void;
 }
@@ -143,6 +143,8 @@ class AsyncLoadSubscriber implements F.ISubscriber {
         callback?: T,
         thisArg?: F.System,
         description?: string,
+        /** 面板所在 bundle（仅 ASYNC_LOAD_AND_INSTANTIATE 生效，默认 resources）；尾参追加，保证旧调用位置参数不变 */
+        bundleName?: string,
     ) {
         F.assert(info.resolve || callback, `subscribe async load failed, callback is invalid`);
 
@@ -178,7 +180,7 @@ class AsyncLoadSubscriber implements F.ISubscriber {
             let request = AsyncLoadSubscriber.loadSingle(loader, asyncLoadKey, resPath, name, parent, (obj: cc.Asset | cc.Node | undefined) => {
                 // 为了保序
                 (allFinishedCallback as (obj: cc.Asset | cc.Node | undefined, index: number) => void)(obj, i);
-            });
+            }, bundleName);
             if (request) requests.push(request);
             else (allFinishedCallback as (obj: cc.Asset | cc.Node | undefined, index: number) => void)(undefined, i);
         }
@@ -214,12 +216,13 @@ class AsyncLoadSubscriber implements F.ISubscriber {
         name: string | undefined,
         parent: cc.Node | undefined,
         callback: LoadCallbackType | (() => void),
+        bundleName?: string,
     ) {
         switch (loadType) {
             case ASYNC_LOAD_SCENE:
                 return loader.loadSceneAsync(resPath, callback as () => void);
             case ASYNC_LOAD_AND_INSTANTIATE:
-                return loader.loadAsyncAndInstantiate(resPath, name!, callback as LoadCallbackType, parent);
+                return loader.loadAsyncAndInstantiate(resPath, name!, callback as LoadCallbackType, parent, bundleName);
             case ASYNC_LOAD_SPRITE:
                 F.assert(parent, "loadSpriteAsync must have parent");
                 return loader.loadSpriteAsync(resPath, callback as LoadCallbackType, parent);

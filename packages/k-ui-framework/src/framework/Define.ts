@@ -11,6 +11,8 @@ export type RUIStore = Readonly<UIStore>;
 export interface IUITemplate {
     /** UI 资源路径 */
     resPath?: string;
+    /** UI 资源所在 bundle 名（配合 resPath 使用；默认 resources bundle） */
+    bundleName?: string;
     /** UI 逻辑挂载的 Tag 列表，默认会挂载 uiTag，不需要传 */
     storeTags?: string[];
     /** Wnd 配置，仅在 UI 为 Wnd 时需要配置 */

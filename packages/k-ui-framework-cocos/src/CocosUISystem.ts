@@ -86,11 +86,12 @@ class CocosUISystem extends F.System {
     @D.linkUtil(UIEngineInterface._loadUIResAsync<cc.Node>)
     public loadUIResAsync(uiStore: RUIStore, parent?: cc.Node, callback?: (res: cc.Node) => void) {
         let rootStore = CocosUIRootStore.getSingleton();
+        let bundleName = uiStore.uiTemplate.bundleName ?? "resources";
         let resPath = uiStore.uiTemplate.resPath ?? `${UI_PANEL_PREFIX}${uiStore.uiTag}.prefab`;
         F.assert(!rootStore.asyncLoadHandles.has(uiStore.id), `loadUIResAsync failed, store.id:${uiStore.id} is loading`);
 
         let onLoadAndInstantiateFinished = (res?: cc.Node) => {
-            F.assert(res instanceof cc.Node, `loadUIRes failed, res.path:${resPath}`);
+            F.assert(res instanceof cc.Node, `loadUIRes failed, res.path:${bundleName}/${resPath}`);
             this.modify(rootStore, (v) => {
                 v.asyncLoadHandles.delete(uiStore.id);
             });
@@ -100,7 +101,7 @@ class CocosUISystem extends F.System {
         };
 
         // reason: 跨包 System 重载增强在 ts7 引用重定向下为幽灵态(仅类型层),这里显式收窄为基类透传签名,保证 src 自检/ts7 构建/dist 消费三种上下文一致可编译
-        let handle = (this.subscribe as (...args: unknown[]) => number).call(this, ASYNC_LOAD_AND_INSTANTIATE, resPath, uiStore.uiTag, parent ?? this.ensureUIRoot(), onLoadAndInstantiateFinished);
+        let handle = (this.subscribe as (...args: unknown[]) => number).call(this, ASYNC_LOAD_AND_INSTANTIATE, resPath, uiStore.uiTag, parent ?? this.ensureUIRoot(), onLoadAndInstantiateFinished, undefined, undefined, bundleName);
         this.modify(rootStore, (v) => {
             v.asyncLoadHandles.set(uiStore.id, handle);
         });
