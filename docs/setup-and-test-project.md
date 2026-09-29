@@ -1,6 +1,6 @@
 # 环境安装与 Test 项目创建流程（Cocos Creator 3.8 / 4.0）
 
-> 本仓库已迁移到 **Cocos Creator 4.0**（TS 原生引擎，无 C# 侧）。旧的 Unity + Puerts 版本已从主分支移除，需要时可从 git 历史 `b31cb16` 找回。
+> 本仓库已从 Unity + Puerts 迁移到 **Cocos Creator**（TS 原生引擎，无 C# 侧），3.8 / 4.0 均支持。旧的 Unity + Puerts 版本已从主分支移除，需要时可从 git 历史 `b31cb16` 找回。
 >
 > 框架运行时包（k-ts-framework/-cocos、k-ui-framework/-cocos）同时兼容 **3.8 与 4.0**：dist 为 ESM（`"type": "module"`、相对导入带 `.js` 后缀），两个大版本均支持脚本从 node_modules 原生导入。3.8 下组件注册失败时框架装饰器自动降级为透传，装配改走代码调用（见 6.4）。
 >
@@ -121,7 +121,7 @@ yarn clean
 ### 6.1 新建 Cocos 工程
 
 1. 打开 Cocos Dashboard → **项目（Projects）** → **新建**；
-2. 选择已安装的 **Creator 4.0.x**，模板选 **Empty(空白)**；
+2. 选择已安装的 **Creator 3.8.x 或 4.0.x**，模板选 **Empty(空白)**；
 3. 项目名称填 `Test`，选择存放路径，点 **创建并打开**。
 
 ### 6.2 接入框架包
@@ -219,7 +219,7 @@ await startPatcher(engine, builtinLanguages, defaultLanguage);
 2. 控制台应输出 `[Test] framework ready`；
 3. 原生平台（iOS/Android/Windows/macOS）或微信小游戏，用 **构建发布** 面板出包后验证（数据表 JSON 经 `F.Engine.readTextFile` 同步读取：原生走 `jsb.fileUtils`，编辑器/web 走 resources 已缓存的 TextAsset）。
 
-至此 Test 项目已具备：Cocos 4.0 工程 + 框架装配 + 最小业务入口。后续按需接 `k-ui-framework`、`k-ts-protobuf`、`game-data-collection` + `k-export-flow` 等包。
+至此 Test 项目已具备：Cocos 3.8 / 4.0 工程 + 框架装配 + 最小业务入口。后续按需接 `k-ui-framework`、`k-ts-protobuf`、`game-data-collection` + `k-export-flow` 等包。
 
 ## 7. 常见问题
 
