@@ -242,6 +242,12 @@ class PathOperation extends Processor<PathOperation> {
             // 边车文件跟随主文件:主文件还在就保留(.meta 里的 uuid 不能丢)
             let sidecar = sidecars.find((ext) => relativePath.endsWith(ext));
             if (sidecar && sourceRelativePaths.has(relativePath.slice(0, -sidecar.length))) continue;
+            // 目录的 .meta 不是陈旧产物:Cocos 把目录本身当资产(bundle 配置/uuid 在目录 meta 里),
+            // 目录不是文件、永远不在产物文件集里,边车规则管不到——主路径是现存目录时跳过清理
+            if (relativePath.endsWith(".meta")) {
+                let mainPath = path.join(to, relativePath.slice(0, -".meta".length));
+                if (fs.existsSync(mainPath) && fs.statSync(mainPath).isDirectory()) continue;
+            }
 
             ExportLogger.logVerbose(`mirror remove stale output: ${file}`);
             this.recordDeleted(file);
